@@ -1,0 +1,15 @@
+{
+  "name": "@visual-knight/core",
+  "version": "0.0.4",
+  "description": "The core which get used by all the other libraries",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mitko Tschimev <mitko@dev-thought.cool>",
+  "license": "SEE LICENSE IN LICENCE",
+  "dependencies": {
+    "@types/request-promise": "^4.1.42",
+    "request-promise": "^4.2.2"
+  }
+}
