@@ -2,9 +2,9 @@ import { get, post, put, RequestPromiseOptions } from "request-promise";
 
 export class VisualKnightCore {
   public options: IProcessScreenshotOptions;
-  private headers: Headers;
+  private headers: any;
 
-  constructor(options: IProcessScreenshotOptions) {
+  constructor(options: IProcessScreenshotOptionsUser) {
     this.options = {
       ...{
         apiScreenshot: `https://api-screenshot.visual-knight.io/v1`,
@@ -16,10 +16,10 @@ export class VisualKnightCore {
       ...(options || {}),
     };
 
-    this.headers = new Headers({
+    this.headers = {
       "Content-Type": "application/json", // Is set automatically
       "x-api-key": this.options.key,
-    });
+    };
   }
 
   public debug(message: string) {
@@ -83,9 +83,9 @@ export class VisualKnightCore {
     // this.debugSection("Visual Knight", "Upload image");
     return put(presigendUrl, {
       body: decodeedScreenshot,
-      headers: new Headers({
+      headers: {
         "Content-Type": "image/png",
-      }),
+      },
     });
   }
 
