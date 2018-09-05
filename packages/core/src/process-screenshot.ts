@@ -15,7 +15,7 @@ export class VisualKnightCore {
           return console.debug(message);
         },
       },
-      ...(options),
+      ...options,
     };
 
     this.headers = {

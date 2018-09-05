@@ -8,7 +8,7 @@
     "notifyMode": "failure-change",
     "collectCoverage": true,
     "moduleNameMapper": {
-        "@visual-knight/(.*)": "<rootDir>/packages/$1/src/index$1.ts"
+        "@visual-knight/(.*)": "<rootDir>/packages/$1/src/index.ts"
     },
     "transform": {
         "^.+\\.(ts|tsx)$": "ts-jest"
