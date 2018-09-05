@@ -11,9 +11,11 @@ export class VisualKnightCore {
         apiTestsessionState: `https://api-testsession.visual-knight.io/v1`,
         liveResult: true,
         misMatchTolerance: 0.01,
-        debugLogger: (message) => console.debug(message),
+        debugLogger(message) {
+          return console.debug(message);
+        },
       },
-      ...(options || {}),
+      ...(options),
     };
 
     this.headers = {
@@ -23,7 +25,7 @@ export class VisualKnightCore {
   }
 
   public debug(message: string) {
-    this.options.debugLogger("Visual Knight");
+    this.options.debugLogger("Visual Knight -> TBD");
   }
 
   public async processScreenshot(testname: string, screenshot: Base64, additional?: any) {
@@ -68,13 +70,11 @@ export class VisualKnightCore {
         switch (errorResponse.statusCode) {
           case 400:
             throw new Error("Not all required fields are set.");
-            break;
           case 403:
             throw new Error("Not Authorized! Check if your key is set correct.");
-            break;
 
           default:
-            throw new Error(errorResponse);
+            throw errorResponse;
         }
       });
   }
@@ -104,28 +104,27 @@ export class VisualKnightCore {
 
     const error = new Error();
 
-    if (result && misMatchPercentage !== null) {
-      if (misMatchPercentage <= misMatchTolerance) {
-        // this.debugSection("Visual Knight", `Image is within tolerance or the same`);
-        return;
-      }
-
-      // this.debugSection("Visual Knight", `Image is different! ${misMatchPercentage}%`);
-      if (misMatchPercentage) {
-        error.message = `Mismatch is greater than the tolerance! -> ${link}`;
-        error.name = "MisMatchPercentageError";
-      }
-      if (!isSameDimensions) {
-        error.message = `Compared Screenshots are not in the same dimension! -> ${link}`;
-        error.name = "IsSameDimensionsError";
-      }
-    } else {
+    if (result && misMatchPercentage === null) {
       //   this.debugSection("Visual Knight", "No baseline defined");
       error.message = `For this image is no baseline defined! -> ${link}`;
       error.name = "NoBaselineError";
+      throw error;
     }
 
-    throw error;
+    if (!isSameDimensions) {
+      error.message = `Compared Screenshots are not in the same dimension! -> ${link}`;
+      error.name = "IsSameDimensionsError";
+      throw error;
+    }
+
+    // this.debugSection("Visual Knight", `Image is different! ${misMatchPercentage}%`);
+    if (misMatchPercentage && misMatchPercentage > misMatchTolerance) {
+      error.message = `Mismatch is greater than the tolerance! -> ${link}`;
+      error.name = "MisMatchPercentageError";
+      throw error;
+    }
+
+    // this.debugSection("Visual Knight", `Image is within tolerance or the same`);
   }
 }
 

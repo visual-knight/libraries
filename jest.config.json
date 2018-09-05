@@ -1,0 +1,18 @@
+{
+    "moduleFileExtensions": [
+        "ts",
+        "tsx",
+        "js"
+    ],
+    "notify": true,
+    "notifyMode": "failure-change",
+    "collectCoverage": true,
+    "moduleNameMapper": {
+        "@visual-knight/(.*)": "<rootDir>/packages/$1/src/index$1.ts"
+    },
+    "transform": {
+        "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "projects": ["<rootDir>/packages/*"]
+}

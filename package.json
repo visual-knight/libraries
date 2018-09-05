@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Collection of libraries for Visual Knight (https://www.visual-knight.io)",
   "private": true,
+  "scripts": {
+    "test": "jest --no-cache --config jest.config.json",
+    "test:watch:all": "jest --no-cache --config jest.config.json --watchAll --collectCoverage",
+    "bootstrap": "lerna bootstrap"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/visual-knight/libraries.git"
@@ -24,5 +29,10 @@
     "lerna": "^3.2.1",
     "tslint": "^5.11.0",
     "typescript": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^23.3.1",
+    "jest": "^23.5.0",
+    "ts-jest": "^23.1.4"
   }
 }
