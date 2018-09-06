@@ -21,11 +21,34 @@ describe("process-screenshot", () => {
     });
 
     post.mockResolvedValueOnce({
-      presignedUrl: "Some presigned url",
+      url: "Some presigned url",
       testSessionId: "Some testSessionId",
     });
 
     visualKnightCore.processScreenshot("testname", "SCREENSHOT").then(() => {
+      done();
+    });
+  });
+
+  it("should upload image to the url from api", (done) => {
+    get.mockResolvedValueOnce({
+      misMatchPercentage: 1,
+      isSameDimensions: true,
+      link: "some link",
+    });
+
+    post.mockResolvedValueOnce({
+      url: "Some presigned url",
+      testSessionId: "Some testSessionId",
+    });
+
+    expect.assertions(1);
+
+    visualKnightCore.processScreenshot("testname", "SCREENSHOT").then(() => {
+      expect(put).toBeCalledWith("Some presigned url", {
+        body: new Buffer("SCREENSHOT", "base64"),
+        headers: { "Content-Type": "image/png" },
+      });
       done();
     });
   });
@@ -38,7 +61,7 @@ describe("process-screenshot", () => {
     });
 
     post.mockResolvedValueOnce({
-      presignedUrl: "Some presigned url",
+      url: "Some presigned url",
       testSessionId: "Some testSessionId",
     });
 
@@ -58,7 +81,7 @@ describe("process-screenshot", () => {
     });
 
     post.mockResolvedValueOnce({
-      presignedUrl: "Some presigned url",
+      url: "Some presigned url",
       testSessionId: "Some testSessionId",
     });
 
@@ -78,7 +101,7 @@ describe("process-screenshot", () => {
     });
 
     post.mockResolvedValueOnce({
-      presignedUrl: "Some presigned url",
+      url: "Some presigned url",
       testSessionId: "Some testSessionId",
     });
 
@@ -131,7 +154,7 @@ describe("process-screenshot", () => {
     });
 
     post.mockResolvedValueOnce({
-      presignedUrl: "Some presigned url",
+      url: "Some presigned url",
       testSessionId: "Some testSessionId",
     });
 

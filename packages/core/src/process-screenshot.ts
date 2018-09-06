@@ -30,9 +30,9 @@ export class VisualKnightCore {
 
   public async processScreenshot(testname: string, screenshot: Base64, additional?: any) {
     // add error handling
-    const { presignedUrl, testSessionId } = await this.getPresignedUrl(testname, additional);
+    const { url, testSessionId } = await this.getPresignedUrl(testname, additional);
 
-    await this.uploadScreenshot(presignedUrl, new Buffer(screenshot, "base64"));
+    await this.uploadScreenshot(url, new Buffer(screenshot, "base64"));
 
     // add error handling
     const testSessionData = await this.getTestSessionState(testSessionId);
@@ -129,7 +129,7 @@ export class VisualKnightCore {
 }
 
 export interface IPresigendUrlResponseData {
-  presignedUrl: string;
+  url: string;
   testSessionId: string;
 }
 
