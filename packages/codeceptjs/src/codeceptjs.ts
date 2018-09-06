@@ -44,7 +44,6 @@ class VisualKnight extends Helper {
   }
 
   public async compareScreenshot(testName: string, additional: any) {
-    // make screenshot
     let screenshot;
     switch (this.config.useHelper) {
       case CODECEPTJS_HELPER.WbdrvierIO:
@@ -65,7 +64,6 @@ class VisualKnight extends Helper {
 
       default:
         throw new Error("Unkown Helper configured");
-      // assert.fail("Unkown Helper configured");
     }
 
     return this.visualKnightCore.processScreenshot(testName, screenshot, additional);

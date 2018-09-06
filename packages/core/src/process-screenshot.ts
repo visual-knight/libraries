@@ -12,7 +12,7 @@ export class VisualKnightCore {
         liveResult: true,
         misMatchTolerance: 0.01,
         debugLogger(message) {
-          return console.debug(message);
+          console.debug(message);
         },
       },
       ...options,
@@ -25,7 +25,7 @@ export class VisualKnightCore {
   }
 
   public debug(message: string) {
-    this.options.debugLogger("Visual Knight -> TBD " + message);
+    this.options.debugLogger("Visual Knight: " + message);
   }
 
   public async processScreenshot(testname: string, screenshot: Base64, additional?: any) {
@@ -59,11 +59,10 @@ export class VisualKnightCore {
       options.body.additional = additional;
     }
 
-    // this.debugSection("Visual Knight", "Requesting signed url");
+    this.debug("Requesting signed url");
     return post(this.options.apiScreenshot, options)
       .then((data: IPresigendUrlResponseData) => {
-        // this.debugSection('Visual Knight', 'Received data: ' + JSON.stringify(body));
-        this.debug(`Visual Knight`);
+        this.debug("Received data: " + JSON.stringify(data));
         return data;
       })
       .catch((errorResponse) => {
@@ -80,7 +79,7 @@ export class VisualKnightCore {
   }
 
   private async uploadScreenshot(presigendUrl: string, decodeedScreenshot: Buffer) {
-    // this.debugSection("Visual Knight", "Upload image");
+    this.debug("Upload image");
     return put(presigendUrl, {
       body: decodeedScreenshot,
       headers: {
@@ -105,7 +104,7 @@ export class VisualKnightCore {
     const error = new Error();
 
     if (result && misMatchPercentage === null) {
-      //   this.debugSection("Visual Knight", "No baseline defined");
+      this.debug("No baseline defined");
       error.message = `For this image is no baseline defined! -> ${link}`;
       error.name = "NoBaselineError";
       throw error;
