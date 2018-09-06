@@ -25,7 +25,7 @@ export class VisualKnightCore {
   }
 
   public debug(message: string) {
-    this.options.debugLogger("Visual Knight -> TBD");
+    this.options.debugLogger("Visual Knight -> TBD " + message);
   }
 
   public async processScreenshot(testname: string, screenshot: Base64, additional?: any) {
