@@ -27,6 +27,7 @@ before_install:
   - npm install --global npm@latest
 
 script:
+  - npm run bootstrap
   - npm run test
 
 notifications:
