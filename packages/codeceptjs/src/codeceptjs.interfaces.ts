@@ -5,7 +5,7 @@ export interface IProcessCodeceptJsOptions extends IProcessScreenshotOptionsUser
 }
 
 export enum CODECEPTJS_HELPER {
-  WbdrvierIO = "WebDriverIO",
+  WebdrvierIO = "WebDriverIO",
   Puppeteer = "Puppeteer",
   Protractor = "Protractor",
 }

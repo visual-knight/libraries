@@ -38,7 +38,7 @@ class VisualKnight extends Helper {
    * Hook executed before each test.
    */
   public _before() {
-    if (this.config.useHelper === CODECEPTJS_HELPER.WbdrvierIO) {
+    if (this.config.useHelper === CODECEPTJS_HELPER.WebdrvierIO) {
       wdioScreenshot.init(this.helpers[this.config.useHelper].browser, this.config);
     }
   }
@@ -46,7 +46,7 @@ class VisualKnight extends Helper {
   public async compareScreenshot(testName: string, additional: any) {
     let screenshot;
     switch (this.config.useHelper) {
-      case CODECEPTJS_HELPER.WbdrvierIO:
+      case CODECEPTJS_HELPER.WebdrvierIO:
         screenshot = await this.helpers[this.config.useHelper].browser.saveDocumentScreenshot();
         break;
 
