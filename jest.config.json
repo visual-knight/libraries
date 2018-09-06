@@ -1,0 +1,29 @@
+{
+    "moduleFileExtensions": [
+        "ts",
+        "tsx",
+        "js",
+        "jsx",
+        "json",
+        "node"
+    ],
+    "notify": true,
+    "notifyMode": "failure-change",
+    "collectCoverage": true,
+    "coverageThreshold": {
+        "global": {
+            "branches": 95,
+            "functions": 95,
+            "lines": 95,
+            "statements": 95
+        }
+    },
+    "moduleNameMapper": {
+        "@visual-knight/(.*)": "<rootDir>/packages/$1/src/index$1.ts"
+    },
+    "transform": {
+        "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "projects": ["<rootDir>/packages/"]
+}
