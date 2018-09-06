@@ -2,11 +2,11 @@
   "name": "@visual-knight/codeceptjs",
   "version": "0.0.4",
   "description": "The core which get used by all the other libraries",
-  "main": "lib/src/index.js",
-  "typings": "lib/src/index.d.ts",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "scripts": {
     "test": "../../node_modules/.bin/jest",
-    "build": "../../node_modules/.bin/tsc -p tsconfig.json"
+    "prepare": "../../node_modules/.bin/tsc -p tsconfig.build.json"
   },
   "author": "Mitko Tschimev <mitko@dev-thought.cool>",
   "license": "SEE LICENSE IN LICENCE",

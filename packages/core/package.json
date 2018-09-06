@@ -6,15 +6,12 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "test": "../../node_modules/.bin/jest",
-    "prepare": "tsc -p tsconfig.build.json"
+    "prepare": "../../node_modules/.bin/tsc -p tsconfig.build.json"
   },
   "author": "Mitko Tschimev <mitko@dev-thought.cool>",
   "license": "SEE LICENSE IN LICENCE",
   "dependencies": {
     "@types/request-promise": "^4.1.42",
     "request-promise": "^4.2.2"
-  },
-  "devDependencies": {
-    "typescript": "^3.0.3"
   }
 }
