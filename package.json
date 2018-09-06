@@ -37,5 +37,8 @@
     "jest": "^23.5.0",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.1.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
