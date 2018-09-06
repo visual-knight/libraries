@@ -2,15 +2,19 @@
   "name": "@visual-knight/core",
   "version": "0.0.4",
   "description": "The core which get used by all the other libraries",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "scripts": {
     "test": "../../node_modules/.bin/jest",
-    "build": "tsc -p tsconfig.json"
+    "prepare": "tsc -p tsconfig.build.json"
   },
   "author": "Mitko Tschimev <mitko@dev-thought.cool>",
   "license": "SEE LICENSE IN LICENCE",
   "dependencies": {
     "@types/request-promise": "^4.1.42",
     "request-promise": "^4.2.2"
+  },
+  "devDependencies": {
+    "typescript": "^3.0.3"
   }
 }
