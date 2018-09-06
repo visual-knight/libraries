@@ -1,8 +1,9 @@
 const Helper = codecept_helper;
-import { IProcessScreenshotOptionsUser, VisualKnightCore } from "@visual-knight/core";
+import { VisualKnightCore } from "@visual-knight/core";
 import * as wdioScreenshot from "wdio-screenshot";
+import { CODECEPTJS_HELPER, IProcessCodeceptJsOptions } from "./codeceptjs.interfaces";
 
-export class VisualKnight extends Helper {
+class VisualKnight extends Helper {
   private visualKnightCore: VisualKnightCore;
   private helpers: any;
 
@@ -71,12 +72,4 @@ export class VisualKnight extends Helper {
   }
 }
 
-export interface IProcessCodeceptJsOptions extends IProcessScreenshotOptionsUser {
-  useHelper: CODECEPTJS_HELPER;
-}
-
-enum CODECEPTJS_HELPER {
-  WbdrvierIO = "WebDriverIO",
-  Puppeteer = "Puppeteer",
-  Protractor = "Protractor",
-}
+export = VisualKnight;

@@ -2,8 +2,8 @@
   "name": "@visual-knight/codeceptjs",
   "version": "0.0.4",
   "description": "The core which get used by all the other libraries",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "lib/codeceptjs.js",
+  "typings": "lib/codeceptjs.d.ts",
   "scripts": {
     "test": "../../node_modules/.bin/jest",
     "prepare": "../../node_modules/.bin/tsc -p tsconfig.build.json"
