@@ -1,6 +1,6 @@
 {
   "name": "@visual-knight/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The core which get used by all the other libraries",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
