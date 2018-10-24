@@ -169,6 +169,40 @@ describe("process-screenshot", () => {
           project: "Some Project",
           test: "testname",
           additional: { someAdditionalData: true },
+          autoBaseline: false,
+        },
+        headers: { "Content-Type": "application/json", "x-api-key": "Some Key" },
+        json: true,
+        method: "POST",
+      });
+      done();
+    });
+  });
+
+  it("should set autoBaseline to false as default to the body", (done) => {
+    get.mockResolvedValueOnce({
+      misMatchPercentage: 1,
+      isSameDimensions: true,
+      link: "some link",
+    });
+
+    post.mockResolvedValueOnce({
+      url: "Some presigned url",
+      testSessionId: "Some testSessionId",
+    });
+
+    expect.assertions(1);
+
+    visualKnightCore.processScreenshot("testname", "SCREENSHOT", { someAdditionalData: true }).then(() => {
+      expect(post).toBeCalledWith("https://api-screenshot.visual-knight.io/v1", {
+        body: {
+          browserName: "Some Browser",
+          deviceName: "Some Device",
+          misMatchTolerance: 0.01,
+          project: "Some Project",
+          test: "testname",
+          additional: { someAdditionalData: true },
+          autoBaseline: false,
         },
         headers: { "Content-Type": "application/json", "x-api-key": "Some Key" },
         json: true,
