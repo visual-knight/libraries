@@ -11,6 +11,7 @@ export class VisualKnightCore {
         apiTestsessionState: `https://api-testsession.visual-knight.io/v1`,
         liveResult: true,
         misMatchTolerance: 0.01,
+        autoBaseline: false,
         debugLogger(message) {
           console.debug(message);
         },
@@ -50,6 +51,7 @@ export class VisualKnightCore {
         misMatchTolerance: this.options.misMatchTolerance,
         browserName: this.options.browserName,
         deviceName: this.options.deviceName,
+        autoBaseline: this.options.autoBaseline,
       },
       headers: this.headers,
       json: true,
@@ -151,6 +153,7 @@ export interface IProcessScreenshotOptionsUser {
   project: string;
   browserName: string;
   deviceName: string;
+  autoBaseline?: boolean;
   apiScreenshot?: string;
   apiTestsessionState?: string;
   misMatchTolerance?: number;

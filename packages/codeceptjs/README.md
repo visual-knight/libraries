@@ -21,6 +21,7 @@ npm install @visual-knight/codeceptjs -D
             "key": "YOUR_KEY",
             "project": "YOUR_PROJECT_ID OR YOUR_PROJECT_NAME",
             "useHelper": "Puppeteer" // define which helper you use
+            ... // more options can be found in the core documentation
         }
     }
 }
