@@ -11,7 +11,7 @@ import { ScreenDimensions } from './utils/ScreenDimension';
 
 // const log = debug("visual-knight-core:makeDocumentScreenshot");
 
-export default async function makeDocumentScreenshot(browser: IBrowserDriverContext, options: IMakeScreenshotOptions) {
+export async function makeDocumentScreenshot(browser: IBrowserDriverContext, options: IMakeScreenshotOptions) {
   // log("start document screenshot");
 
   // hide scrollbars, scroll to start, hide & remove elements, wait for render

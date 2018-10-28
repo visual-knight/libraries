@@ -14,7 +14,7 @@ import { ScreenDimensions } from './utils/ScreenDimension';
 // const log = debug("visual-knight-core:makeViewportScreenshot");
 
 // Note: function name must be async to signalize WebdriverIO that this function returns a promise
-export default async function makeViewportScreenshot(
+export async function makeViewportScreenshot(
   browser: IBrowserDriverContext,
   options: IMakeScreenshotOptions = {}
 ) {

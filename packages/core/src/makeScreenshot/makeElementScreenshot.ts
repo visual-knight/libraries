@@ -11,7 +11,7 @@ import groupBoundingRect from './utils/groupBoundingRect';
 
 // const log = debug("visual-knight-core:makeElementScreenshot");
 
-export default async function makeElementScreenshot(
+export async function makeElementScreenshot(
   browser: IBrowserDriverContext,
   elementSelector: string,
   options: IMakeScreenshotOptions
