@@ -140,7 +140,7 @@ export interface ITestSessionResponseData {
   link: string;
 }
 
-export interface IProcessScreenshotOptions extends IProcessScreenshotOptionsUser {
+interface IProcessScreenshotOptions extends IProcessScreenshotOptionsUser {
   apiScreenshot: string;
   apiTestsessionState: string;
   misMatchTolerance: number;
@@ -160,4 +160,4 @@ export interface IProcessScreenshotOptionsUser {
   liveResult?: boolean;
 }
 
-type Base64 = string;
+export type Base64 = string;
