@@ -1,22 +1,28 @@
 // import debug from "debug";
 
-import afterScreenshot from "./afterScreenshot";
-import beforeScreenshot from "./beforeScreenshot";
-import makeAreaScreenshot from "./makeAreaScreenshot";
+import afterScreenshot from './afterScreenshot';
+import beforeScreenshot from './beforeScreenshot';
+import makeAreaScreenshot from './makeAreaScreenshot';
 
-import getBoundingRects from "./scripts/getBoundingRects";
-import groupBoundingRect from "./utils/groupBoundingRect";
+import { IBrowserDriverContext } from './browser-context.interface';
+import { IMakeScreenshotOptions } from './makeScreenshot.interface';
+import getBoundingRects from './scripts/getBoundingRects';
+import groupBoundingRect from './utils/groupBoundingRect';
 
-// const log = debug("wdio-screenshot:makeElementScreenshot");
+// const log = debug("visual-knight-core:makeElementScreenshot");
 
-export default async function makeElementScreenshot(browser: any, elementSelector: string, options = {}) {
+export default async function makeElementScreenshot(
+  browser: IBrowserDriverContext,
+  elementSelector: string,
+  options: IMakeScreenshotOptions
+) {
   // log("start element screenshot");
 
   // hide scrollbars, scroll to start, hide & remove elements, wait for render
   await beforeScreenshot(browser, options);
 
   // get bounding rect of elements
-  const boundingRects = await browser.selectorExecute(elementSelector, getBoundingRects);
+  const boundingRects = await browser.selectorExecuteScript(elementSelector, getBoundingRects);
   const boundingRect = groupBoundingRect(boundingRects);
 
   // make screenshot of area
@@ -25,7 +31,7 @@ export default async function makeElementScreenshot(browser: any, elementSelecto
     boundingRect.left,
     boundingRect.top,
     boundingRect.right,
-    boundingRect.bottom,
+    boundingRect.bottom
   );
 
   // show scrollbars, show & add elements

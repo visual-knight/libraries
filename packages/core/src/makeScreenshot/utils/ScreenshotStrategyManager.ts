@@ -1,14 +1,15 @@
 // import debug from 'debug';
 
-import { FullpageScreenshotStrategy } from "./strategies/FullpageScreenshotStrategy";
-import { MergeScreenshotStrategy } from "./strategies/MergeScreenshotStrategy";
-import { TrimAndMergeScreenshotStrategy } from "./strategies/TrimAndMergeScreenshotStrategy";
+import { IBrowserDriverContext } from '../browser-context.interface';
+import { FullpageScreenshotStrategy } from './strategies/FullpageScreenshotStrategy';
+import { MergeScreenshotStrategy } from './strategies/MergeScreenshotStrategy';
+import { TrimAndMergeScreenshotStrategy } from './strategies/TrimAndMergeScreenshotStrategy';
 
 const regexPhantomjs = /phantomjs/i;
 
-// const log = debug("wdio-screenshot:ScreenshotStrategyManager");
+// const log = debug("visual-knight-core:ScreenshotStrategyManager");
 
-function matchBrowserName(browser: any, regex: RegExp) {
+function matchBrowserName(browser: IBrowserDriverContext, regex: RegExp) {
   return (
     browser.desiredCapabilities &&
     browser.desiredCapabilities.browserName &&
@@ -16,12 +17,12 @@ function matchBrowserName(browser: any, regex: RegExp) {
   );
 }
 
-function isPhantomjs(browser: any) {
+function isPhantomjs(browser: IBrowserDriverContext) {
   return matchBrowserName(browser, regexPhantomjs);
 }
 
 export class ScreenshotStrategyManager {
-  public static getStrategy(browser: any, screenDimensions: any) {
+  public static getStrategy(browser: IBrowserDriverContext, screenDimensions: any) {
     if (isPhantomjs(browser)) {
       // log("use full page strategy");
       return new FullpageScreenshotStrategy(screenDimensions);

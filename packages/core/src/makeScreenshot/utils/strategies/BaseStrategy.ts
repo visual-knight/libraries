@@ -1,4 +1,4 @@
-import { CropDimension } from "../CropDimension";
+import { CropDimension } from '../CropDimension';
 
 export abstract class BaseStrategy {
   protected area!: {
@@ -12,7 +12,7 @@ export abstract class BaseStrategy {
   constructor(protected screenDimensions: any) {
     this.index = {
       x: 0,
-      y: 0,
+      y: 0
     };
 
     this.setScrollArea(0, 0, this.screenDimensions.getDocumentWidth(), this.screenDimensions.getDocumentHeight());
@@ -23,20 +23,20 @@ export abstract class BaseStrategy {
     const documentHeight = this.screenDimensions.getDocumentHeight();
 
     if (startX >= documentWidth) {
-      throw new Error("startX is out of range");
+      throw new Error('startX is out of range');
     } else if (startY >= documentHeight) {
-      throw new Error("startY is out of range");
+      throw new Error('startY is out of range');
     } else if (endX > documentWidth) {
-      throw new Error("endX is out of range");
+      throw new Error('endX is out of range');
     } else if (endY > documentHeight) {
-      throw new Error("endY is out of range");
+      throw new Error('endY is out of range');
     }
 
     this.area = {
       startX,
       startY,
       endX,
-      endY,
+      endY
     };
   }
 
@@ -57,11 +57,11 @@ export abstract class BaseStrategy {
   public abstract hasNextVerticalScrollPosition(): boolean;
 
   public getScrollPosition() {
-    throw new Error("not implemented, override it");
+    throw new Error('not implemented, override it');
   }
 
   public getCropDimensions() {
-    throw new Error("not implemented, override it");
+    throw new Error('not implemented, override it');
   }
 
   public createCropDimensions(width: number, height: number, x: number, y: number, top: boolean, rotation: number) {

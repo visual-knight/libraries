@@ -1,4 +1,4 @@
-import { BaseStrategy } from "./BaseStrategy";
+import { BaseStrategy } from './BaseStrategy';
 
 export class MergeScreenshotStrategy extends BaseStrategy {
   public hasNextHorizontalScrollPosition() {
@@ -21,7 +21,7 @@ export class MergeScreenshotStrategy extends BaseStrategy {
       x: this.area.startX + this.index.x * viewportWidth,
       y: this.area.startY + this.index.y * viewportHeight,
       indexX: this.index.x,
-      indexY: this.index.y,
+      indexY: this.index.y
     };
   }
 

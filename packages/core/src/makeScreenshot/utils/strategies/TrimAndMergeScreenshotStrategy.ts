@@ -1,4 +1,4 @@
-import { BaseStrategy } from "./BaseStrategy";
+import { BaseStrategy } from './BaseStrategy';
 
 // 1px x 3 for retina
 const NAV_SHADOW_CONST = 5;
@@ -7,7 +7,7 @@ const NAV_SHADOW_CONST_COMBINED = NAV_SHADOW_CONST * 2;
 
 exports.consts = {
   NAV_SHADOW_CONST,
-  NAV_SHADOW_CONST_COMBINED,
+  NAV_SHADOW_CONST_COMBINED
 };
 
 export class TrimAndMergeScreenshotStrategy extends BaseStrategy {
@@ -34,7 +34,7 @@ export class TrimAndMergeScreenshotStrategy extends BaseStrategy {
       x: this.area.startX + this.index.x * viewportWidth,
       y: this.area.startY + this.index.y * viewportHeight,
       indexX: this.index.x,
-      indexY: this.index.y,
+      indexY: this.index.y
     };
   }
 

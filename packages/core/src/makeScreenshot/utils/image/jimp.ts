@@ -1,6 +1,6 @@
-import Jimp from "jimp";
-import { Base64 } from "../../../process-screenshot";
-import { CropDimension } from "../CropDimension";
+import Jimp from 'jimp';
+import { Base64 } from '../../../process-screenshot';
+import { CropDimension } from '../CropDimension';
 
 /**
  * Crops an image
@@ -10,10 +10,10 @@ import { CropDimension } from "../CropDimension";
  */
 export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDimension) {
   if (!(cropDimensions instanceof CropDimension)) {
-    throw new Error("Please provide a valid instance of CropDimension!");
+    throw new Error('Please provide a valid instance of CropDimension!');
   }
 
-  const image = await Jimp.read(new Buffer(base64Screenshot, "base64"));
+  const image = await Jimp.read(new Buffer(base64Screenshot, 'base64'));
 
   if (cropDimensions.getRotation() !== 0) {
     image.rotate(cropDimensions.getRotation());
@@ -24,7 +24,7 @@ export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDi
   const x = cropDimensions.getX();
   let y = cropDimensions.getY();
 
-  if (cropDimensions.getGravity() === "SouthWest") {
+  if (cropDimensions.getGravity() === 'SouthWest') {
     const diffHeight = height - y - cropDimensions.getHeight();
     y = diffHeight;
   }
@@ -37,7 +37,7 @@ export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDi
       if (err) {
         return reject(err);
       }
-      return resolve(buffer.toString("base64"));
+      return resolve(buffer.toString('base64'));
     });
   });
 }
@@ -49,7 +49,7 @@ export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDi
  * @returns {string}        screenshot
  */
 export async function scaleImage(base64Screenshot: Base64, scaleFactor: number) {
-  const image = await Jimp.read(new Buffer(base64Screenshot, "base64"));
+  const image = await Jimp.read(new Buffer(base64Screenshot, 'base64'));
   image.scale(scaleFactor);
 
   return new Promise((resolve, reject) => {
@@ -57,7 +57,7 @@ export async function scaleImage(base64Screenshot: Base64, scaleFactor: number) 
       if (err) {
         return reject(err);
       }
-      return resolve(buffer.toString("base64"));
+      return resolve(buffer.toString('base64'));
     });
   });
 }
@@ -72,17 +72,19 @@ export async function mergeImages(images: any[]) {
   let imageHeight = 0;
 
   // merge horizontal
-  const rowImagePromises = images.map(async (row) => {
+  const rowImagePromises = images.map(async row => {
     let width = 0;
     let height = 0;
 
-    const colImagesPromises: Array<Promise<Jimp>> = row.map(async (colImage: any): Promise<Jimp> => {
-      const readImage = await Jimp.read(colImage);
-      width += readImage.bitmap.width;
-      height = readImage.bitmap.height;
+    const colImagesPromises: Array<Promise<Jimp>> = row.map(
+      async (colImage: any): Promise<Jimp> => {
+        const readImage = await Jimp.read(colImage);
+        width += readImage.bitmap.width;
+        height = readImage.bitmap.height;
 
-      return readImage;
-    });
+        return readImage;
+      }
+    );
 
     const colImages = await Promise.all(colImagesPromises);
     const newImage = await new Jimp(width, height);
@@ -116,7 +118,7 @@ export async function mergeImages(images: any[]) {
       if (err) {
         return reject(err);
       }
-      return resolve(buffer.toString("base64"));
+      return resolve(buffer.toString('base64'));
     });
   });
   return base64Screenshot;

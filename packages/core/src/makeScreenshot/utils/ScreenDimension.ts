@@ -1,4 +1,6 @@
-export default class ScreenDimensions {
+import { IBrowserDriverContext } from '../browser-context.interface';
+
+export class ScreenDimensions {
   private isIOS: any;
   private viewportWidth: number;
   private viewportHeight: number;
@@ -11,8 +13,9 @@ export default class ScreenDimensions {
   private pixelRatio: any;
   private orientation: any;
 
-  constructor(options: any, browser: any = {}) {
+  constructor(options: IScreenDimensionOptions, browser: IBrowserDriverContext = { isIOS: false } as any) {
     const { html, body, window } = options;
+
     const { isIOS } = browser;
 
     this.isIOS = isIOS;
@@ -25,7 +28,7 @@ export default class ScreenDimensions {
       body.offsetHeight,
       html.clientHeight,
       html.scrollHeight,
-      html.offsetHeight,
+      html.offsetHeight
     );
 
     const screenMax = Math.max(window.screenWidth, window.screenHeight);
@@ -108,4 +111,26 @@ export default class ScreenDimensions {
   public applyScaleFactor(widthOrHeight: number) {
     return Math.round(widthOrHeight * this.getScale());
   }
+}
+
+export interface IScreenDimensionOptions {
+  window: {
+    innerWidth: number;
+    innerHeight: number;
+    pixelRatio: number;
+    orientation: number;
+    screenWidth: number;
+    screenHeight: number;
+  };
+  body: {
+    scrollHeight: number;
+    offsetHeight: number;
+  };
+  html: {
+    clientWidth: number;
+    scrollWidth: number;
+    clientHeight: number;
+    scrollHeight: number;
+    offsetHeight: number;
+  };
 }

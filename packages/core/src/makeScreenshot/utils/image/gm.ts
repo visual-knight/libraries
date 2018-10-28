@@ -1,12 +1,12 @@
-import fsExtra from "fs-extra";
-import gm from "gm";
-import path from "path";
+import fsExtra from 'fs-extra';
+import gm from 'gm';
+import path from 'path';
 
-import { Base64 } from "core/src/process-screenshot";
-import { CropDimension } from "../CropDimension";
-import { generateUUID } from "../generateUUID";
+import { Base64 } from 'core/src/process-screenshot';
+import { CropDimension } from '../CropDimension';
+import { generateUUID } from '../generateUUID';
 
-const tmpDir = path.join(__dirname, "../../../.tmp");
+const tmpDir = path.join(__dirname, '../../../.tmp');
 
 /**
  * Crops an image
@@ -16,24 +16,24 @@ const tmpDir = path.join(__dirname, "../../../.tmp");
  */
 export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDimension) {
   if (!(cropDimensions instanceof CropDimension)) {
-    throw new Error("Please provide a valid instance of CropDimension!");
+    throw new Error('Please provide a valid instance of CropDimension!');
   }
 
-  const image = gm(new Buffer(base64Screenshot, "base64"));
+  const image = gm(new Buffer(base64Screenshot, 'base64'));
 
   if (cropDimensions.getRotation() !== 0) {
-    image.rotate("white", cropDimensions.getRotation());
+    image.rotate('white', cropDimensions.getRotation());
   }
 
   image.gravity(cropDimensions.getGravity());
   image.crop(cropDimensions.getWidth(), cropDimensions.getHeight(), cropDimensions.getX(), cropDimensions.getY());
 
   return new Promise((resolve, reject) => {
-    image.toBuffer("PNG", (err, buffer) => {
+    image.toBuffer('PNG', (err, buffer) => {
       if (err) {
         return reject(err);
       }
-      return resolve(buffer.toString("base64"));
+      return resolve(buffer.toString('base64'));
     });
   });
 }
@@ -45,19 +45,19 @@ export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDi
  * @returns {string}        screenshot
  */
 export async function scaleImage(base64Screenshot: Base64, scaleFactor: number) {
-  const image = gm(new Buffer(base64Screenshot, "base64"));
+  const image = gm(new Buffer(base64Screenshot, 'base64'));
 
   const percent = scaleFactor * 100;
-  image.filter("Box"); // to produce equal images as Jimp
+  image.filter('Box'); // to produce equal images as Jimp
   // image.filter('Sinc'); // works also but was slower in tests
-  image.resize(percent, percent, "%");
+  image.resize(percent, percent, '%');
 
   return new Promise((resolve, reject) => {
-    image.toBuffer("PNG", (err, buffer) => {
+    image.toBuffer('PNG', (err, buffer) => {
       if (err) {
         return reject(err);
       }
-      return resolve(buffer.toString("base64"));
+      return resolve(buffer.toString('base64'));
     });
   });
 }
@@ -86,7 +86,7 @@ export async function mergeImages(images: any[]) {
 
       return new Promise((resolve, reject) => {
         const file = path.join(dir, `${key}.png`);
-        rowImage.write(file, (err) => {
+        rowImage.write(file, err => {
           if (err) {
             return reject(err);
           }
@@ -105,11 +105,11 @@ export async function mergeImages(images: any[]) {
       }
 
       return new Promise((resolve, reject) => {
-        mergedImage.toBuffer("PNG", (err, buffer) => {
+        mergedImage.toBuffer('PNG', (err, buffer) => {
           if (err) {
             return reject(err);
           }
-          return resolve(buffer.toString("base64"));
+          return resolve(buffer.toString('base64'));
         });
       });
     });

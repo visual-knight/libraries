@@ -5,7 +5,7 @@ export class CropDimension {
     private x: number,
     private y: number,
     private top = true,
-    private rotation = 0,
+    private rotation = 0
   ) {}
 
   public getWidth() {
@@ -25,7 +25,7 @@ export class CropDimension {
   }
 
   public getGravity() {
-    return this.top ? "NorthWest" : "SouthWest";
+    return this.top ? 'NorthWest' : 'SouthWest';
   }
 
   public getRotation() {

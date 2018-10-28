@@ -1,6 +1,6 @@
 export default function modifyElements() {
   const args = Array.prototype.slice.call(arguments).filter((n: string) => {
-    return !!n || n === "";
+    return !!n || n === '';
   });
   const style = args[args.length - 2];
   const value = args[args.length - 1];
@@ -13,9 +13,9 @@ export default function modifyElements() {
       const element = args[i][j];
 
       try {
-        element.style.setProperty(style, value, "important");
+        element.style.setProperty(style, value, 'important');
       } catch (error) {
-        element.setAttribute("style", element.style.cssText + style + ":" + value + "!important;");
+        element.setAttribute('style', element.style.cssText + style + ':' + value + '!important;');
       }
     }
   }

@@ -1,23 +1,25 @@
 // import debug from "debug";
 
-import afterScreenshot from "./afterScreenshot";
-import beforeScreenshot from "./beforeScreenshot";
-import makeAreaScreenshot from "./makeAreaScreenshot";
+import afterScreenshot from './afterScreenshot';
+import beforeScreenshot from './beforeScreenshot';
+import makeAreaScreenshot from './makeAreaScreenshot';
 
-import getScreenDimensions from "./scripts/getScreenDimensions";
-import ScreenDimension from "./utils/ScreenDimension";
+import { IBrowserDriverContext } from './browser-context.interface';
+import { IMakeScreenshotOptions } from './makeScreenshot.interface';
+import { getScreenDimensions } from './scripts/getScreenDimensions';
+import { ScreenDimensions } from './utils/ScreenDimension';
 
-// const log = debug("wdio-screenshot:makeDocumentScreenshot");
+// const log = debug("visual-knight-core:makeDocumentScreenshot");
 
-export default async function makeDocumentScreenshot(browser: any, options = {}) {
+export default async function makeDocumentScreenshot(browser: IBrowserDriverContext, options: IMakeScreenshotOptions) {
   // log("start document screenshot");
 
   // hide scrollbars, scroll to start, hide & remove elements, wait for render
   await beforeScreenshot(browser, options);
 
   // get screen dimisions to determine document height & width
-  const screenDimensions = (await browser.execute(getScreenDimensions)).value;
-  const screenDimension = new ScreenDimension(screenDimensions, browser);
+  const screenDimensions = (await browser.executeScript(getScreenDimensions)).value;
+  const screenDimension = new ScreenDimensions(screenDimensions, browser);
 
   // make screenshot of area
   const base64Image = await makeAreaScreenshot(
@@ -25,7 +27,7 @@ export default async function makeDocumentScreenshot(browser: any, options = {})
     0,
     0,
     screenDimension.getDocumentWidth(),
-    screenDimension.getDocumentHeight(),
+    screenDimension.getDocumentHeight()
   );
 
   // show scrollbars, show & add elements

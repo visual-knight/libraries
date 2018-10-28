@@ -1,29 +1,34 @@
 // import debug from "debug";
 
-import afterScreenshot from "./afterScreenshot";
-import beforeScreenshot from "./beforeScreenshot";
-import makeAreaScreenshot from "./makeAreaScreenshot";
+import afterScreenshot from './afterScreenshot';
+import beforeScreenshot from './beforeScreenshot';
+import makeAreaScreenshot from './makeAreaScreenshot';
 
-import getScreenDimensions from "./scripts/getScreenDimensions";
-import getScrollPosition from "./scripts/getScrollPosition";
-import scroll from "./scripts/scroll";
-import ScreenDimension from "./utils/ScreenDimension";
+import { IBrowserDriverContext } from './browser-context.interface';
+import { IMakeScreenshotOptions } from './makeScreenshot.interface';
+import { getScreenDimensions } from './scripts/getScreenDimensions';
+import getScrollPosition from './scripts/getScrollPosition';
+import scroll from './scripts/scroll';
+import { ScreenDimensions } from './utils/ScreenDimension';
 
-// const log = debug("wdio-screenshot:makeViewportScreenshot");
+// const log = debug("visual-knight-core:makeViewportScreenshot");
 
 // Note: function name must be async to signalize WebdriverIO that this function returns a promise
-export default async function makeViewportScreenshot(browser: any, options = {}) {
+export default async function makeViewportScreenshot(
+  browser: IBrowserDriverContext,
+  options: IMakeScreenshotOptions = {}
+) {
   // log("start viewport screenshot");
 
   // get current scroll position
-  const [startX, startY] = (await browser.execute(getScrollPosition)).value;
+  const [startX, startY] = (await browser.executeScript(getScrollPosition)).value;
 
   // hide scrollbars, scroll to start, hide & remove elements, wait for render
   await beforeScreenshot(browser, options);
 
   // get screen dimisions to determine viewport height & width
-  const screenDimensions = (await browser.execute(getScreenDimensions)).value;
-  const screenDimension = new ScreenDimension(screenDimensions, browser);
+  const screenDimensions = (await browser.executeScript(getScreenDimensions)).value;
+  const screenDimension = new ScreenDimensions(screenDimensions, browser);
 
   // make screenshot of area
   const base64Image = await makeAreaScreenshot(
@@ -31,14 +36,14 @@ export default async function makeViewportScreenshot(browser: any, options = {})
     startX,
     startY,
     screenDimension.getViewportWidth(),
-    screenDimension.getViewportHeight(),
+    screenDimension.getViewportHeight()
   );
 
   // show scrollbars, show & add elements
   await afterScreenshot(browser, options);
 
   // scroll back to original position
-  await browser.execute(scroll, startX, startY);
+  await browser.executeScript(scroll, startX, startY);
 
   // log("end viewport screenshot");
 
