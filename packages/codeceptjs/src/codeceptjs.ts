@@ -1,7 +1,7 @@
 const Helper = codecept_helper;
-import { VisualKnightCore } from "@visual-knight/core";
-import * as wdioScreenshot from "wdio-screenshot";
-import { CODECEPTJS_HELPER, IProcessCodeceptJsOptions } from "./codeceptjs.interfaces";
+import { makeDocumentScreenshot, VisualKnightCore } from '@visual-knight/core';
+import * as wdioScreenshot from 'wdio-screenshot';
+import { CODECEPTJS_HELPER, IProcessCodeceptJsOptions } from './codeceptjs.interfaces';
 
 class VisualKnight extends Helper {
   private visualKnightCore: VisualKnightCore;
@@ -52,18 +52,24 @@ class VisualKnight extends Helper {
 
       case CODECEPTJS_HELPER.Protractor:
         screenshot = await this.helpers[this.config.useHelper].browser.takeScreenshot();
+        screenshot = await makeDocumentScreenshot({
+          executeScript: this.helpers[this.config.useHelper].browser.executeScript,
+          desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
+          pause: this.helpers[this.config.useHelper].browser.sleep,
+          screenshot: this.helpers[this.config.useHelper].browser.takeScreenshot
+        });
         break;
 
       case CODECEPTJS_HELPER.Puppeteer:
-        this.visualKnightCore.options.browserName = "Chrome";
-        this.visualKnightCore.options.deviceName = "Puppeteer";
+        this.visualKnightCore.options.browserName = 'Chrome';
+        this.visualKnightCore.options.deviceName = 'Puppeteer';
         screenshot = await this.helpers[this.config.useHelper].page.screenshot({
-          fullPage: true,
+          fullPage: true
         });
         break;
 
       default:
-        throw new Error("Unkown Helper configured");
+        throw new Error('Unkown Helper configured');
     }
 
     return this.visualKnightCore.processScreenshot(testName, screenshot, additional);

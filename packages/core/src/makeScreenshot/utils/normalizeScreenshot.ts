@@ -1,12 +1,11 @@
 import { Base64 } from '../../process-screenshot';
 import { IBrowserDriverContext } from '../browser-context.interface';
 import { CropDimension } from './CropDimension';
-import getBase64ImageSize from './getBase64ImageSize';
+import { getBase64ImageSize } from './getBase64ImageSize';
 import { cropImage, scaleImage } from './image';
 import { ScreenDimensions } from './ScreenDimension';
 
 async function normalizeRetinaScreenshot(
-  browser: IBrowserDriverContext,
   screenDimensions: ScreenDimensions,
   base64Screenshot: Base64
 ): Promise<Base64> {
@@ -29,11 +28,7 @@ async function normalizeRetinaScreenshot(
   return base64Screenshot;
 }
 
-async function normalizeIOSScreenshot(
-  browser: IBrowserDriverContext,
-  screenDimensions: ScreenDimensions,
-  base64Screenshot: Base64
-) {
+async function normalizeIOSScreenshot(screenDimensions: ScreenDimensions, base64Screenshot: Base64) {
   const toolbarHeight = 44; // bottom toolbar has always a fixed height of 44px
   const addressbarHeight = 44; // bottom toolbar has always a fixed height of 44px
 
@@ -82,12 +77,12 @@ export default async function normalizeSreenshot(
 
   // check if we could have a retina image
   if (screenDimensions.getPixelRatio() > 1) {
-    normalizedScreenshot = await normalizeRetinaScreenshot(browser, screenDimensions, normalizedScreenshot);
+    normalizedScreenshot = await normalizeRetinaScreenshot(screenDimensions, normalizedScreenshot);
   }
 
   // check if we have to crop navigation- & toolbar for iOS
   if (browser.isMobile && browser.isIOS) {
-    normalizedScreenshot = (await normalizeIOSScreenshot(browser, screenDimensions, normalizedScreenshot)) as Base64;
+    normalizedScreenshot = (await normalizeIOSScreenshot(screenDimensions, normalizedScreenshot)) as Base64;
   }
   return normalizedScreenshot;
 }

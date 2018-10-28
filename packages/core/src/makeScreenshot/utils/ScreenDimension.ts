@@ -13,10 +13,10 @@ export class ScreenDimensions {
   private pixelRatio: any;
   private orientation: any;
 
-  constructor(options: IScreenDimensionOptions, browser: IBrowserDriverContext = { isIOS: false } as any) {
+  constructor(options: IScreenDimensionOptions, browser: IBrowserDriverContext) {
     const { html, body, window } = options;
 
-    const { isIOS } = browser;
+    const { isIOS } = browser!;
 
     this.isIOS = isIOS;
     this.viewportWidth = window.innerWidth || html.clientWidth || 0;

@@ -1,12 +1,12 @@
-import fsExtra from 'fs-extra';
-import gm from 'gm';
-import path from 'path';
+import { ensureDir, remove } from 'fs-extra';
+import * as gm from 'gm';
+import { join } from 'path';
 
-import { Base64 } from 'core/src/process-screenshot';
+import { Base64 } from '../../../process-screenshot';
 import { CropDimension } from '../CropDimension';
 import { generateUUID } from '../generateUUID';
 
-const tmpDir = path.join(__dirname, '../../../.tmp');
+const tmpDir = join(__dirname, '../../../.tmp');
 
 /**
  * Crops an image
@@ -14,7 +14,7 @@ const tmpDir = path.join(__dirname, '../../../.tmp');
  * @param  {CropDimension} cropDimensions   dimensions
  * @return {string}                  cropped image
  */
-export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDimension) {
+export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDimension): Promise<Base64> {
   if (!(cropDimensions instanceof CropDimension)) {
     throw new Error('Please provide a valid instance of CropDimension!');
   }
@@ -28,8 +28,8 @@ export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDi
   image.gravity(cropDimensions.getGravity());
   image.crop(cropDimensions.getWidth(), cropDimensions.getHeight(), cropDimensions.getX(), cropDimensions.getY());
 
-  return new Promise((resolve, reject) => {
-    image.toBuffer('PNG', (err, buffer) => {
+  return new Promise<Base64>((resolve, reject) => {
+    image.toBuffer('PNG', (err: Error, buffer: Buffer) => {
       if (err) {
         return reject(err);
       }
@@ -53,7 +53,7 @@ export async function scaleImage(base64Screenshot: Base64, scaleFactor: number) 
   image.resize(percent, percent, '%');
 
   return new Promise((resolve, reject) => {
-    image.toBuffer('PNG', (err, buffer) => {
+    image.toBuffer('PNG', (err: Error, buffer: Buffer) => {
       if (err) {
         return reject(err);
       }
@@ -67,12 +67,12 @@ export async function scaleImage(base64Screenshot: Base64, scaleFactor: number) 
  * @param  {string[][]} images array of images
  * @return {string}        screenshot
  */
-export async function mergeImages(images: any[]) {
+export async function mergeImages(images: any[][]): Promise<Base64> {
   const uuid = generateUUID();
-  const dir = path.join(tmpDir, uuid);
+  const dir = join(tmpDir, uuid);
 
   try {
-    await fsExtra.ensureDir(dir);
+    await ensureDir(dir);
 
     // merge all horizintal screens
     const rowImagesPromises = images.map((colImages, key) => {
@@ -85,8 +85,8 @@ export async function mergeImages(images: any[]) {
       }
 
       return new Promise((resolve, reject) => {
-        const file = path.join(dir, `${key}.png`);
-        rowImage.write(file, err => {
+        const file = join(dir, `${key}.png`);
+        rowImage.write(file, (err: Error) => {
           if (err) {
             return reject(err);
           }
@@ -104,8 +104,8 @@ export async function mergeImages(images: any[]) {
         mergedImage.append.apply(mergedImage, rowImages);
       }
 
-      return new Promise((resolve, reject) => {
-        mergedImage.toBuffer('PNG', (err, buffer) => {
+      return new Promise<Base64>((resolve, reject) => {
+        mergedImage.toBuffer('PNG', (err: Error, buffer: Buffer) => {
           if (err) {
             return reject(err);
           }
@@ -114,11 +114,11 @@ export async function mergeImages(images: any[]) {
       });
     });
 
-    await fsExtra.remove(dir);
+    await remove(dir);
     return base64Screenshot;
   } catch (e) {
     try {
-      await fsExtra.remove(dir);
+      await remove(dir);
       // tslint:disable-next-line:no-empty
     } catch (e) {}
 

@@ -4,10 +4,11 @@ export default function virtualScroll(x: number, y: number, remove: boolean) {
 
   const translate = remove ? 'none' : `translate(${w}px,${h}px)`;
   const html = document.documentElement as HTMLElement;
+  const style = html.style as any;
 
-  html.style.webkitTransform = translate;
-  html.style.mozTransform = translate;
-  html.style.msTransform = translate;
-  html.style.oTransform = translate;
-  html.style.transform = translate;
+  style.webkitTransform = translate;
+  style.mozTransform = translate;
+  style.msTransform = translate;
+  style.oTransform = translate;
+  style.transform = translate;
 }

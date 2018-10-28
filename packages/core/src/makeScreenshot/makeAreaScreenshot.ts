@@ -1,29 +1,29 @@
 // import debug from "debug";
-import fsExtra from "fs-extra";
-import path from "path";
+import { ensureDir, remove } from 'fs-extra';
+import { join } from 'path';
 
-import { Base64 } from "../process-screenshot";
-import { IBrowserDriverContext } from "./browser-context.interface";
-import { getScreenDimensions } from "./scripts/getScreenDimensions";
-import pageHeight from "./scripts/pageHeight";
-import virtualScroll from "./scripts/virtualScroll";
-import { CropDimension } from "./utils/CropDimension";
-import { generateUUID } from "./utils/generateUUID";
-import { cropImage, mergeImages } from "./utils/image";
-import normalizeScreenshot from "./utils/normalizeScreenshot";
-import saveBase64Image from "./utils/saveBase64Image";
-import { ScreenDimensions } from "./utils/ScreenDimension";
-import { ScreenshotStrategyManager } from "./utils/ScreenshotStrategyManager";
+import { Base64 } from '../process-screenshot';
+import { IBrowserDriverContext } from './browser-context.interface';
+import { getScreenDimensions } from './scripts/getScreenDimensions';
+import pageHeight from './scripts/pageHeight';
+import virtualScroll from './scripts/virtualScroll';
+import { CropDimension } from './utils/CropDimension';
+import { generateUUID } from './utils/generateUUID';
+import { cropImage, mergeImages } from './utils/image';
+import normalizeScreenshot from './utils/normalizeScreenshot';
+import saveBase64Image from './utils/saveBase64Image';
+import { ScreenDimensions } from './utils/ScreenDimension';
+import { ScreenshotStrategyManager } from './utils/ScreenshotStrategyManager';
 
 // const log = debug("visual-knight-core:makeAreaScreenshot");
-const tmpDir = path.join(__dirname, "..", "..", ".tmp");
+const tmpDir = join(__dirname, '..', '..', '.tmp');
 
 async function storeScreenshot(
   browser: IBrowserDriverContext,
   screenDimensions: ScreenDimensions,
   cropDimensions: CropDimension,
   base64Screenshot: Base64,
-  filePath: string,
+  filePath: string
 ) {
   const normalizedBase64Screenshot = await normalizeScreenshot(browser, screenDimensions, base64Screenshot);
   // log(
@@ -34,7 +34,7 @@ async function storeScreenshot(
   //   cropDimensions.getY(),
   // );
 
-  const croppedBase64Screenshot = (await cropImage(normalizedBase64Screenshot, cropDimensions)) as Base64;
+  const croppedBase64Screenshot = await cropImage(normalizedBase64Screenshot, cropDimensions);
 
   await saveBase64Image(filePath, croppedBase64Screenshot);
 }
@@ -44,11 +44,11 @@ export default async function makeAreaScreenshot(
   startX: number,
   startY: number,
   endX: number,
-  endY: number,
+  endY: number
 ) {
   // log("requested a screenshot for the following area: %j", { startX, startY, endX, endY });
 
-  const screenDimensions = (await browser.executeScript(getScreenDimensions)).value;
+  const screenDimensions = (await browser.executeScript(getScreenDimensions));
   // log("detected screenDimensions %j", screenDimensions);
   const screenDimension = new ScreenDimensions(screenDimensions, browser);
 
@@ -57,10 +57,10 @@ export default async function makeAreaScreenshot(
 
   const uuid = generateUUID();
 
-  const dir = path.join(tmpDir, uuid);
+  const dir = join(tmpDir, uuid);
 
   try {
-    await fsExtra.ensureDir(dir);
+    await ensureDir(dir);
 
     const cropImages: any = [];
     const screenshotPromises: any = [];
@@ -77,9 +77,9 @@ export default async function makeAreaScreenshot(
       await browser.pause(100);
 
       // log("take screenshot");
-      const base64Screenshot = (await browser.screenshot()).value;
+      const base64Screenshot = (await browser.screenshot());
       const cropDimensions = screenshotStrategy.getCropDimensions();
-      const filePath = path.join(dir, `${indexY}-${indexX}.png`);
+      const filePath = join(dir, `${indexY}-${indexX}.png`);
 
       screenshotPromises.push(storeScreenshot(browser, screenDimension, cropDimensions, base64Screenshot, filePath));
 
@@ -100,22 +100,22 @@ export default async function makeAreaScreenshot(
         // tslint:disable-next-line:no-shadowed-variable
         const mergedBase64Screenshot = await mergeImages(cropImages);
         // log("remove temp dir");
-        await fsExtra.remove(dir);
+        await remove(dir);
         return mergedBase64Screenshot;
       }),
       Promise.resolve().then(async () => {
         // log("reset page height");
-        await browser.executeScript(pageHeight, "");
+        await browser.executeScript(pageHeight, '');
 
         // log("revert scroll to x: %s, y: %s", 0, 0);
         await browser.executeScript(virtualScroll, 0, 0, true);
-      }),
+      })
     ]);
 
     return mergedBase64Screenshot;
   } catch (e) {
     try {
-      await fsExtra.remove(dir);
+      await remove(dir);
       // tslint:disable-next-line:no-empty
     } catch (e) {}
 

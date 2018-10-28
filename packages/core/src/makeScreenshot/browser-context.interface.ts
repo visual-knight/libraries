@@ -1,5 +1,3 @@
-import { Base64 } from '../process-screenshot';
-
 export interface IBrowserDriverContext {
   isIOS?: boolean;
   isMobile?: boolean;

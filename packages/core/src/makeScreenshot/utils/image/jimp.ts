@@ -1,4 +1,4 @@
-import Jimp from 'jimp';
+const Jimp = require('jimp');
 import { Base64 } from '../../../process-screenshot';
 import { CropDimension } from '../CropDimension';
 
@@ -8,7 +8,7 @@ import { CropDimension } from '../CropDimension';
  * @param  {CropDimension} cropDimensions   dimensions
  * @return {string}                  cropped image
  */
-export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDimension) {
+export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDimension): Promise<Base64> {
   if (!(cropDimensions instanceof CropDimension)) {
     throw new Error('Please provide a valid instance of CropDimension!');
   }
@@ -32,8 +32,8 @@ export async function cropImage(base64Screenshot: Base64, cropDimensions: CropDi
   // image.gravity(cropDimensions.getGravity());
   image.crop(x, y, cropDimensions.getWidth(), cropDimensions.getHeight());
 
-  return new Promise((resolve, reject) => {
-    image.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+  return new Promise<Base64>((resolve, reject) => {
+    image.getBuffer(Jimp.MIME_PNG, (err: Error, buffer: Buffer) => {
       if (err) {
         return reject(err);
       }
@@ -53,7 +53,7 @@ export async function scaleImage(base64Screenshot: Base64, scaleFactor: number) 
   image.scale(scaleFactor);
 
   return new Promise((resolve, reject) => {
-    image.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+    image.getBuffer(Jimp.MIME_PNG, (err: Error, buffer: Buffer) => {
       if (err) {
         return reject(err);
       }
@@ -67,7 +67,7 @@ export async function scaleImage(base64Screenshot: Base64, scaleFactor: number) 
  * @param  {string[][]} images array of images
  * @return {string}        screenshot
  */
-export async function mergeImages(images: any[]) {
+export async function mergeImages(images: any[]): Promise<Base64> {
   let imageWidth = 0;
   let imageHeight = 0;
 
@@ -76,8 +76,8 @@ export async function mergeImages(images: any[]) {
     let width = 0;
     let height = 0;
 
-    const colImagesPromises: Array<Promise<Jimp>> = row.map(
-      async (colImage: any): Promise<Jimp> => {
+    const colImagesPromises: Array<Promise<any>> = row.map(
+      async (colImage: any): Promise<any> => {
         const readImage = await Jimp.read(colImage);
         width += readImage.bitmap.width;
         height = readImage.bitmap.height;
@@ -113,8 +113,8 @@ export async function mergeImages(images: any[]) {
   }
 
   // finally get screenshot
-  const base64Screenshot = await new Promise((resolve, reject) => {
-    image.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+  const base64Screenshot = await new Promise<Base64>((resolve, reject) => {
+    image.getBuffer(Jimp.MIME_PNG, (err: Error, buffer: Buffer) => {
       if (err) {
         return reject(err);
       }
