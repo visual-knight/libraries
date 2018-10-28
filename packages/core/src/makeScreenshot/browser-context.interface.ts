@@ -1,12 +1,12 @@
 import { Base64 } from '../process-screenshot';
 
 export interface IBrowserDriverContext {
-  isIOS: boolean;
-  isMobile: boolean;
+  isIOS?: boolean;
+  isMobile?: boolean;
   // TODO: get interface for desiredCapabilities (default selenium?)
   desiredCapabilities: any;
   executeScript(script: (...args: any[]) => any, ...args: any[]): Promise<any>;
-  selectorExecuteScript(
+  selectorExecuteScript?(
     selector: string,
     script: (selectorElements: HTMLElement[], ...args: any[]) => any,
     ...args: any[]

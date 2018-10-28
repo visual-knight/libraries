@@ -14,7 +14,7 @@ import groupBoundingRect from './utils/groupBoundingRect';
 export async function makeElementScreenshot(
   browser: IBrowserDriverContext,
   elementSelector: string,
-  options: IMakeScreenshotOptions
+  options: IMakeScreenshotOptions = {}
 ) {
   // log("start element screenshot");
 
@@ -22,7 +22,7 @@ export async function makeElementScreenshot(
   await beforeScreenshot(browser, options);
 
   // get bounding rect of elements
-  const boundingRects = await browser.selectorExecuteScript(elementSelector, getBoundingRects);
+  const boundingRects = await browser.selectorExecuteScript!(elementSelector, getBoundingRects);
   const boundingRect = groupBoundingRect(boundingRects);
 
   // make screenshot of area
