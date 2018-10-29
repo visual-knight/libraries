@@ -6,7 +6,6 @@ import {
   makeViewportScreenshot,
   VisualKnightCore
 } from '@visual-knight/core';
-import * as requireg from 'requireg';
 import * as wdioScreenshot from 'wdio-screenshot';
 import { CODECEPTJS_HELPER, ICompareScreenshotOptions, IProcessCodeceptJsOptions } from './codeceptjs.interfaces';
 
@@ -99,7 +98,6 @@ class VisualKnight extends Helper {
   }
 
   private async protractorMakeScreenshot(options: ICompareScreenshotOptions) {
-    const ProtractorBy = requireg('protractor').ProtractorBy;
     const browserContext: IBrowserDriverContext = {
       executeScript: this.helpers[this.config.useHelper].browser.executeScript,
       selectorExecuteScript: async (selector, script) => {
@@ -110,7 +108,7 @@ class VisualKnight extends Helper {
       screenshot: this.helpers[this.config.useHelper].browser.takeScreenshot
     };
     if (options.viewport) {
-      return makeViewportScreenshot(browserContext);
+      return this.helpers[this.config.useHelper].browser.takeScreenshot();
     }
     if (options.element) {
       return makeElementScreenshot(browserContext, options.element);
