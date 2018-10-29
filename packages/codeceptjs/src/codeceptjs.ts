@@ -134,13 +134,15 @@ class VisualKnight extends Helper {
 
   private async webdriverIOMakeScreenshot(options: ICompareScreenshotOptions) {
     const browserContext: IBrowserDriverContext = {
-      executeScript: async(script) => {
-        return (await this.helpers[this.config.useHelper].browser.execute(script)).value
+      executeScript: async script => {
+        return (await this.helpers[this.config.useHelper].browser.execute(script)).value;
       },
       selectorExecuteScript: this.helpers[this.config.useHelper].browser.selectorExecute,
       desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
       pause: this.helpers[this.config.useHelper].browser.pause,
-      screenshot: this.helpers[this.config.useHelper].browser.screenshot
+      screenshot: async () => {
+        return (await this.helpers[this.config.useHelper].browser.screenshot()).value;
+      }
     };
 
     if (options.viewport) {
