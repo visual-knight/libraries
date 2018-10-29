@@ -1,7 +1,14 @@
 const Helper = codecept_helper;
-import { makeDocumentScreenshot, VisualKnightCore } from '@visual-knight/core';
+import {
+  IBrowserDriverContext,
+  makeDocumentScreenshot,
+  makeElementScreenshot,
+  makeViewportScreenshot,
+  VisualKnightCore
+} from '@visual-knight/core';
+import * as requireg from 'requireg';
 import * as wdioScreenshot from 'wdio-screenshot';
-import { CODECEPTJS_HELPER, IProcessCodeceptJsOptions } from './codeceptjs.interfaces';
+import { CODECEPTJS_HELPER, ICompareScreenshotOptions, IProcessCodeceptJsOptions } from './codeceptjs.interfaces';
 
 class VisualKnight extends Helper {
   private visualKnightCore: VisualKnightCore;
@@ -43,29 +50,45 @@ class VisualKnight extends Helper {
     }
   }
 
-  public async compareScreenshot(testName: string, additional: any) {
+  public async compareFullpageScreenshot(testName: string, additional: any) {
+    return this.compareScreenshot(testName, {}, additional);
+  }
+
+  public async compareViewportScreenshot(testName: string, additional: any) {
+    return this.compareScreenshot(
+      testName,
+      {
+        viewport: true
+      },
+      additional
+    );
+  }
+
+  public async compareElementScreenshot(elementSelector: string, testName: string, additional: any) {
+    return this.compareScreenshot(
+      testName,
+      {
+        element: elementSelector
+      },
+      additional
+    );
+  }
+
+  private async compareScreenshot(testName: string, options: ICompareScreenshotOptions, additional: any) {
     let screenshot;
     switch (this.config.useHelper) {
       case CODECEPTJS_HELPER.WebdrvierIO:
-        screenshot = await this.helpers[this.config.useHelper].browser.saveDocumentScreenshot();
+        screenshot = await this.webdriverIOMakeScreenshot(options);
         break;
 
       case CODECEPTJS_HELPER.Protractor:
-        screenshot = await this.helpers[this.config.useHelper].browser.takeScreenshot();
-        screenshot = await makeDocumentScreenshot({
-          executeScript: this.helpers[this.config.useHelper].browser.executeScript,
-          desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
-          pause: this.helpers[this.config.useHelper].browser.sleep,
-          screenshot: this.helpers[this.config.useHelper].browser.takeScreenshot
-        });
+        screenshot = await this.protractorMakeScreenshot(options);
         break;
 
       case CODECEPTJS_HELPER.Puppeteer:
         this.visualKnightCore.options.browserName = 'Chrome';
         this.visualKnightCore.options.deviceName = 'Puppeteer';
-        screenshot = await this.helpers[this.config.useHelper].page.screenshot({
-          fullPage: true
-        });
+        screenshot = await this.puppeteerMakeScreenshot(options);
         break;
 
       default:
@@ -73,6 +96,36 @@ class VisualKnight extends Helper {
     }
 
     return this.visualKnightCore.processScreenshot(testName, screenshot, additional);
+  }
+
+  private async protractorMakeScreenshot(options: ICompareScreenshotOptions) {
+    const ProtractorBy = requireg('protractor').ProtractorBy;
+    const browserContext: IBrowserDriverContext = {
+      executeScript: this.helpers[this.config.useHelper].browser.executeScript,
+      selectorExecuteScript: async (selector, script) => {
+        return this.helpers[this.config.useHelper].browser.executeScript(script, selector);
+      },
+      desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
+      pause: this.helpers[this.config.useHelper].browser.sleep,
+      screenshot: this.helpers[this.config.useHelper].browser.takeScreenshot
+    };
+    if (options.viewport) {
+      return makeViewportScreenshot(browserContext);
+    }
+    if (options.element) {
+      return makeElementScreenshot(browserContext, options.element);
+    }
+    return makeDocumentScreenshot(browserContext);
+  }
+
+  private async puppeteerMakeScreenshot(options: ICompareScreenshotOptions) {
+    return this.helpers[this.config.useHelper].page.screenshot({
+      fullPage: true
+    });
+  }
+
+  private async webdriverIOMakeScreenshot(options: ICompareScreenshotOptions) {
+    return this.helpers[this.config.useHelper].browser.saveDocumentScreenshot();
   }
 }
 
