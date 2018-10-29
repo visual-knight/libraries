@@ -4,7 +4,6 @@ import {
   IBrowserDriverContext,
   makeDocumentScreenshot,
   makeElementScreenshot,
-  makeViewportScreenshot,
   VisualKnightCore
 } from '@visual-knight/core';
 import * as wdioScreenshot from 'wdio-screenshot';
@@ -76,17 +75,29 @@ class VisualKnight extends Helper {
 
   private async compareScreenshot(testName: string, options: ICompareScreenshotOptions, additional: any) {
     let screenshot;
+    const helper = this.helpers[this.config.useHelper];
+
+    const browserContext: IBrowserDriverContext = {
+      executeScript: helper.executeScript.bind(helper),
+      selectorExecuteScript: async (selector, script) => helper.executeScript(script, selector),
+      desiredCapabilities: helper.desiredCapabilities,
+      pause: async time => helper.wait(time / 1000),
+      screenshot: () => {
+        throw new Error('implement me');
+      }
+    };
+
     switch (this.config.useHelper) {
       case CODECEPTJS_HELPER.WebdrvierIO:
-        screenshot = await this.webdriverIOMakeScreenshot(options);
+        screenshot = await this.webdriverIOMakeScreenshot(browserContext, options);
         break;
 
       case CODECEPTJS_HELPER.Protractor:
-        screenshot = await this.protractorMakeScreenshot(options);
+        screenshot = await this.protractorMakeScreenshot(browserContext, options);
         break;
 
       case CODECEPTJS_HELPER.Nightmare:
-        screenshot = await this.nightmareMakeScreenshot(options);
+        screenshot = await this.nightmareMakeScreenshot(browserContext, options);
         break;
 
       case CODECEPTJS_HELPER.Puppeteer:
@@ -102,19 +113,15 @@ class VisualKnight extends Helper {
     return this.visualKnightCore.processScreenshot(testName, screenshot, additional);
   }
 
-  private async protractorMakeScreenshot(options: ICompareScreenshotOptions): Promise<Base64> {
-    const browserContext: IBrowserDriverContext = {
-      executeScript: this.helpers[this.config.useHelper].browser.executeScript,
-      selectorExecuteScript: async (selector, script) => {
-        return this.helpers[this.config.useHelper].browser.executeScript(script, selector);
-      },
-      desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
-      pause: this.helpers[this.config.useHelper].browser.sleep,
-      screenshot: this.helpers[this.config.useHelper].browser.takeScreenshot
-    };
+  private async protractorMakeScreenshot(
+    browserContext: IBrowserDriverContext,
+    options: ICompareScreenshotOptions
+  ): Promise<Base64> {
+    const browser = this.helpers[this.config.useHelper].browser;
+    browserContext.screenshot = browser.takeScreenshot;
 
     if (options.viewport) {
-      return this.helpers[this.config.useHelper].browser.takeScreenshot();
+      return browser.takeScreenshot();
     }
     if (options.element) {
       return makeElementScreenshot(browserContext, options.element);
@@ -123,34 +130,28 @@ class VisualKnight extends Helper {
   }
 
   private async puppeteerMakeScreenshot(options: ICompareScreenshotOptions): Promise<Base64> {
+    const page = this.helpers[this.config.useHelper].page;
     if (options.viewport) {
-      return this.helpers[this.config.useHelper].page.screenshot({ encoding: 'base64' });
+      return page.screenshot({ encoding: 'base64' });
     }
     if (options.element) {
-      const element = await this.helpers[this.config.useHelper].page.$(options.element);
+      const element = await page.$(options.element);
       return element.screenshot({ encoding: 'base64' });
     }
-    return this.helpers[this.config.useHelper].page.screenshot({
+    return page.screenshot({
       fullPage: true,
       encoding: 'base64'
     });
   }
 
-  private async webdriverIOMakeScreenshot(options: ICompareScreenshotOptions) {
-    const browserContext: IBrowserDriverContext = {
-      executeScript: async script => {
-        return (await this.helpers[this.config.useHelper].browser.execute(script)).value;
-      },
-      selectorExecuteScript: this.helpers[this.config.useHelper].browser.selectorExecute,
-      desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
-      pause: this.helpers[this.config.useHelper].browser.pause,
-      screenshot: async () => {
-        return (await this.helpers[this.config.useHelper].browser.screenshot()).value;
-      }
+  private async webdriverIOMakeScreenshot(browserContext: IBrowserDriverContext, options: ICompareScreenshotOptions) {
+    const browser = this.helpers[this.config.useHelper].browser;
+    browserContext.screenshot = async () => {
+      return (await browser.screenshot()).value;
     };
 
     if (options.viewport) {
-      return makeViewportScreenshot(browserContext);
+      return (await browser.screenshot()).value;
     }
     if (options.element) {
       return makeElementScreenshot(browserContext, options.element);
@@ -158,17 +159,10 @@ class VisualKnight extends Helper {
     return makeDocumentScreenshot(browserContext);
   }
 
-  private async nightmareMakeScreenshot(options: ICompareScreenshotOptions) {
-    const helper = this.helpers[this.config.useHelper];
+  private async nightmareMakeScreenshot(browserContext: IBrowserDriverContext, options: ICompareScreenshotOptions) {
     const browser = this.helpers[this.config.useHelper].browser;
-    const browserContext: IBrowserDriverContext = {
-      executeScript: helper.executeScript.bind(helper),
-      selectorExecuteScript: async (selector, script) => helper.executeScript(script, selector),
-      desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
-      pause: async time => helper.wait(time / 1000),
-      screenshot: async () => {
-        return (await browser.screenshot()).toString('base64');
-      }
+    browserContext.screenshot = async () => {
+      return (await browser.screenshot()).toString('base64');
     };
 
     if (options.viewport) {
