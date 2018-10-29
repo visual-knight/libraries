@@ -85,6 +85,11 @@ class VisualKnight extends Helper {
         screenshot = await this.protractorMakeScreenshot(options);
         break;
 
+      case CODECEPTJS_HELPER.Nightmare:
+        console.log('CODECEPTJS_HELPER.Nightmare', CODECEPTJS_HELPER.Nightmare);
+        screenshot = await this.nightmareMakeScreenshot(options);
+        break;
+
       case CODECEPTJS_HELPER.Puppeteer:
         this.visualKnightCore.options.browserName = 'Chrome';
         this.visualKnightCore.options.deviceName = 'Puppeteer';
@@ -147,6 +152,33 @@ class VisualKnight extends Helper {
 
     if (options.viewport) {
       return makeViewportScreenshot(browserContext);
+    }
+    if (options.element) {
+      return makeElementScreenshot(browserContext, options.element);
+    }
+    return makeDocumentScreenshot(browserContext);
+  }
+
+  private async nightmareMakeScreenshot(options: ICompareScreenshotOptions) {
+    const browser = this.helpers[this.config.useHelper].browser;
+    const browserContext: IBrowserDriverContext = {
+      executeScript: async script => {
+        console.log(script);
+        console.log(await browser.evaluate_now(script));
+        return this.helpers[this.config.useHelper].browser.evaluate.apply(script);
+      },
+      selectorExecuteScript: async (selector, script) => {
+        return browser.evaluate(script, selector);
+      },
+      desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
+      pause: this.helpers[this.config.useHelper].browser.wait,
+      screenshot: async () => {
+        return (await browser.screenshot()).toString('base64');
+      }
+    };
+
+    if (options.viewport) {
+      return await browser.screenshot().toString('base64');
     }
     if (options.element) {
       return makeElementScreenshot(browserContext, options.element);
