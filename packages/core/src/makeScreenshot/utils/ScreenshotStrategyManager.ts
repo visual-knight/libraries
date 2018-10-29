@@ -1,4 +1,4 @@
-// import debug from 'debug';
+import * as debug from 'debug';
 
 import { IBrowserDriverContext } from '../browser-context.interface';
 import { FullpageScreenshotStrategy } from './strategies/FullpageScreenshotStrategy';
@@ -7,7 +7,7 @@ import { TrimAndMergeScreenshotStrategy } from './strategies/TrimAndMergeScreens
 
 const regexPhantomjs = /phantomjs/i;
 
-// const log = debug("visual-knight-core:ScreenshotStrategyManager");
+const log = debug('visual-knight-core:ScreenshotStrategyManager');
 
 function matchBrowserName(browser: IBrowserDriverContext, regex: RegExp) {
   return (
@@ -24,17 +24,17 @@ function isPhantomjs(browser: IBrowserDriverContext) {
 export class ScreenshotStrategyManager {
   public static getStrategy(browser: IBrowserDriverContext, screenDimensions: any) {
     if (isPhantomjs(browser)) {
-      // log("use full page strategy");
+      log('use full page strategy');
       return new FullpageScreenshotStrategy(screenDimensions);
     }
 
     const { isIOS } = browser;
     if (isIOS) {
-      // log("use iOS Trim and Merge viewport strategy");
+      log('use iOS Trim and Merge viewport strategy');
       return new TrimAndMergeScreenshotStrategy(screenDimensions);
     }
 
-    // log("use merge viewport strategy");
+    log('use merge viewport strategy');
     return new MergeScreenshotStrategy(screenDimensions);
   }
 }

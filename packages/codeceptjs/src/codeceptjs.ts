@@ -108,6 +108,7 @@ class VisualKnight extends Helper {
       pause: this.helpers[this.config.useHelper].browser.sleep,
       screenshot: this.helpers[this.config.useHelper].browser.takeScreenshot
     };
+
     if (options.viewport) {
       return this.helpers[this.config.useHelper].browser.takeScreenshot();
     }
@@ -132,7 +133,23 @@ class VisualKnight extends Helper {
   }
 
   private async webdriverIOMakeScreenshot(options: ICompareScreenshotOptions) {
-    return this.helpers[this.config.useHelper].browser.saveDocumentScreenshot();
+    const browserContext: IBrowserDriverContext = {
+      executeScript: async(script) => {
+        return (await this.helpers[this.config.useHelper].browser.execute(script)).value
+      },
+      selectorExecuteScript: this.helpers[this.config.useHelper].browser.selectorExecute,
+      desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
+      pause: this.helpers[this.config.useHelper].browser.pause,
+      screenshot: this.helpers[this.config.useHelper].browser.screenshot
+    };
+
+    if (options.viewport) {
+      return makeViewportScreenshot(browserContext);
+    }
+    if (options.element) {
+      return makeElementScreenshot(browserContext, options.element);
+    }
+    return makeDocumentScreenshot(browserContext);
   }
 }
 

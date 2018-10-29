@@ -1,4 +1,4 @@
-// import debug from "debug";
+import * as debug from 'debug';
 
 import afterScreenshot from './afterScreenshot';
 import beforeScreenshot from './beforeScreenshot';
@@ -9,10 +9,10 @@ import { IMakeScreenshotOptions } from './makeScreenshot.interface';
 import { getScreenDimensions } from './scripts/getScreenDimensions';
 import { ScreenDimensions } from './utils/ScreenDimension';
 
-// const log = debug("visual-knight-core:makeDocumentScreenshot");
+const log = debug('visual-knight-core:makeDocumentScreenshot');
 
 export async function makeDocumentScreenshot(browser: IBrowserDriverContext, options: IMakeScreenshotOptions = {}) {
-  // log("start document screenshot");
+  log('start document screenshot');
 
   // hide scrollbars, scroll to start, hide & remove elements, wait for render
   await beforeScreenshot(browser, options);
@@ -33,7 +33,7 @@ export async function makeDocumentScreenshot(browser: IBrowserDriverContext, opt
   // show scrollbars, show & add elements
   await afterScreenshot(browser, options);
 
-  // log("end document screenshot");
+  log('end document screenshot');
 
   return base64Image;
 }
