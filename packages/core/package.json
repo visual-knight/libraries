@@ -6,7 +6,8 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "test": "../../node_modules/.bin/jest",
-    "prepare": "../../node_modules/.bin/tsc -p tsconfig.build.json"
+    "clean": "rimraf lib",
+    "prepare": "npm run clean && ../../node_modules/.bin/tsc -p tsconfig.build.json"
   },
   "author": "Mitko Tschimev <mitko@dev-thought.cool>",
   "license": "SEE LICENSE IN LICENCE",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@types/gm": "^1.18.1",
-    "@types/uuid": "^3.4.4"
+    "@types/uuid": "^3.4.4",
+    "rimraf": "^2.6.2"
   }
 }

@@ -6,7 +6,8 @@
   "typings": "lib/codeceptjs.d.ts",
   "scripts": {
     "test": "../../node_modules/.bin/jest",
-    "prepare": "../../node_modules/.bin/tsc -p tsconfig.build.json"
+    "clean": "rimraf lib",
+    "prepare": "npm run clean && ../../node_modules/.bin/tsc -p tsconfig.build.json"
   },
   "author": "Mitko Tschimev <mitko@dev-thought.cool>",
   "license": "SEE LICENSE IN LICENCE",
@@ -17,5 +18,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.2"
   }
 }
