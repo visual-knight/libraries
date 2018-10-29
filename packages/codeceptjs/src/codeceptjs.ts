@@ -86,7 +86,6 @@ class VisualKnight extends Helper {
         break;
 
       case CODECEPTJS_HELPER.Nightmare:
-        console.log('CODECEPTJS_HELPER.Nightmare', CODECEPTJS_HELPER.Nightmare);
         screenshot = await this.nightmareMakeScreenshot(options);
         break;
 
@@ -160,25 +159,20 @@ class VisualKnight extends Helper {
   }
 
   private async nightmareMakeScreenshot(options: ICompareScreenshotOptions) {
+    const helper = this.helpers[this.config.useHelper];
     const browser = this.helpers[this.config.useHelper].browser;
     const browserContext: IBrowserDriverContext = {
-      executeScript: async script => {
-        console.log(script);
-        console.log(await browser.evaluate_now(script));
-        return this.helpers[this.config.useHelper].browser.evaluate.apply(script);
-      },
-      selectorExecuteScript: async (selector, script) => {
-        return browser.evaluate(script, selector);
-      },
+      executeScript: helper.executeScript.bind(helper),
+      selectorExecuteScript: async (selector, script) => helper.executeScript(script, selector),
       desiredCapabilities: this.helpers[this.config.useHelper].desiredCapabilities,
-      pause: this.helpers[this.config.useHelper].browser.wait,
+      pause: async time => helper.wait(time / 1000),
       screenshot: async () => {
         return (await browser.screenshot()).toString('base64');
       }
     };
 
     if (options.viewport) {
-      return await browser.screenshot().toString('base64');
+      return (await browser.screenshot()).toString('base64');
     }
     if (options.element) {
       return makeElementScreenshot(browserContext, options.element);
