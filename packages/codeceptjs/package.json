@@ -6,7 +6,7 @@
   "typings": "lib/codeceptjs.d.ts",
   "scripts": {
     "test": "../../node_modules/.bin/jest",
-    "prepublishOnly": "../../node_modules/.bin/tsc -p tsconfig.build.json"
+    "prepare": "../../node_modules/.bin/tsc -p tsconfig.build.json"
   },
   "author": "Mitko Tschimev <mitko@dev-thought.cool>",
   "license": "SEE LICENSE IN LICENCE",
