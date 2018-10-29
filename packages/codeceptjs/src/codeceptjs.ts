@@ -1,5 +1,6 @@
 const Helper = codecept_helper;
 import {
+  Base64,
   IBrowserDriverContext,
   makeDocumentScreenshot,
   makeElementScreenshot,
@@ -97,7 +98,7 @@ class VisualKnight extends Helper {
     return this.visualKnightCore.processScreenshot(testName, screenshot, additional);
   }
 
-  private async protractorMakeScreenshot(options: ICompareScreenshotOptions) {
+  private async protractorMakeScreenshot(options: ICompareScreenshotOptions): Promise<Base64> {
     const browserContext: IBrowserDriverContext = {
       executeScript: this.helpers[this.config.useHelper].browser.executeScript,
       selectorExecuteScript: async (selector, script) => {
@@ -116,9 +117,17 @@ class VisualKnight extends Helper {
     return makeDocumentScreenshot(browserContext);
   }
 
-  private async puppeteerMakeScreenshot(options: ICompareScreenshotOptions) {
+  private async puppeteerMakeScreenshot(options: ICompareScreenshotOptions): Promise<Base64> {
+    if (options.viewport) {
+      return this.helpers[this.config.useHelper].page.screenshot({ encoding: 'base64' });
+    }
+    if (options.element) {
+      const element = await this.helpers[this.config.useHelper].page.$(options.element);
+      return element.screenshot({ encoding: 'base64' });
+    }
     return this.helpers[this.config.useHelper].page.screenshot({
-      fullPage: true
+      fullPage: true,
+      encoding: 'base64'
     });
   }
 
