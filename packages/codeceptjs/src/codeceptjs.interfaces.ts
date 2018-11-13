@@ -4,11 +4,15 @@ export interface IProcessCodeceptJsOptions extends IProcessScreenshotOptionsUser
   useHelper: CODECEPTJS_HELPER;
 }
 
-export interface ICompareScreenshotOptions {
+export interface ICompareScreenshotOptions extends ICompareScreenshotOptionsUser {
   viewport?: boolean;
+  element?: string;
+}
+
+export interface ICompareScreenshotOptionsUser {
   hide?: string[];
   remove?: string[];
-  element?: string;
+  additional?: any;
 }
 
 export enum CODECEPTJS_HELPER {

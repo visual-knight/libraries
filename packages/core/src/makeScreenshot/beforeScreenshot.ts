@@ -8,7 +8,7 @@ import triggerResize from './scripts/triggerResize';
 
 const log = debug('visual-knight-core:beforeScreenshot');
 
-export default async function beforeScreenshot(browser: IBrowserDriverContext, options: any) {
+export async function beforeScreenshot(browser: IBrowserDriverContext, options: any) {
   // hide scrollbars
   log('hide scrollbars');
   await browser.executeScript(scrollbars, false);

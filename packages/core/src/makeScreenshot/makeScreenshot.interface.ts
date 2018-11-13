@@ -1,4 +1,4 @@
 export interface IMakeScreenshotOptions {
   hide?: string[];
-  remove?: [];
+  remove?: string[];
 }

@@ -10,13 +10,14 @@ export default function modifyElements() {
   for (let i = 0; i < args.length; ++i) {
     // tslint:disable-next-line:prefer-for-of
     for (let j = 0; j < args[i].length; ++j) {
-      const element = args[i][j];
-
-      try {
-        element.style.setProperty(style, value, 'important');
-      } catch (error) {
-        element.setAttribute('style', element.style.cssText + style + ':' + value + '!important;');
-      }
+      const elements = document.querySelectorAll(args[i][j]);
+      elements.forEach(element => {
+        try {
+          element.style.setProperty(style, value, 'important');
+        } catch (error) {
+          element.setAttribute('style', element.style.cssText + style + ':' + value + '!important;');
+        }
+      });
     }
   }
 }

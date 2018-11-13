@@ -1,13 +1,20 @@
 const Helper = codecept_helper;
 import {
+  afterScreenshot,
   Base64,
+  beforeScreenshot,
   IBrowserDriverContext,
   makeDocumentScreenshot,
   makeElementScreenshot,
   VisualKnightCore
 } from '@visual-knight/core';
 import * as wdioScreenshot from 'wdio-screenshot';
-import { CODECEPTJS_HELPER, ICompareScreenshotOptions, IProcessCodeceptJsOptions } from './codeceptjs.interfaces';
+import {
+  CODECEPTJS_HELPER,
+  ICompareScreenshotOptions,
+  ICompareScreenshotOptionsUser,
+  IProcessCodeceptJsOptions
+} from './codeceptjs.interfaces';
 
 class VisualKnight extends Helper {
   private visualKnightCore: VisualKnightCore;
@@ -49,37 +56,35 @@ class VisualKnight extends Helper {
     }
   }
 
-  public async compareFullpageScreenshot(testName: string, additional: any) {
-    return this.compareScreenshot(testName, {}, additional);
+  public async compareFullpageScreenshot(testName: string, options: ICompareScreenshotOptionsUser) {
+    return this.compareScreenshot(testName, options);
   }
 
-  public async compareViewportScreenshot(testName: string, additional: any) {
-    return this.compareScreenshot(
-      testName,
-      {
-        viewport: true
-      },
-      additional
-    );
+  public async compareViewportScreenshot(testName: string, options: ICompareScreenshotOptionsUser) {
+    return this.compareScreenshot(testName, {
+      ...options,
+      viewport: true
+    });
   }
 
-  public async compareElementScreenshot(elementSelector: string, testName: string, additional: any) {
-    return this.compareScreenshot(
-      testName,
-      {
-        element: elementSelector
-      },
-      additional
-    );
+  public async compareElementScreenshot(
+    elementSelector: string,
+    testName: string,
+    options: ICompareScreenshotOptionsUser
+  ) {
+    return this.compareScreenshot(testName, {
+      ...options,
+      element: elementSelector
+    });
   }
 
-  private async compareScreenshot(testName: string, options: ICompareScreenshotOptions, additional: any) {
+  private async compareScreenshot(testName: string, options: ICompareScreenshotOptions = {}) {
     let screenshot;
     const helper = this.helpers[this.config.useHelper];
 
     const browserContext: IBrowserDriverContext = {
       executeScript: helper.executeScript.bind(helper),
-      selectorExecuteScript: async (selector, script) => helper.executeScript(script, selector),
+      selectorExecuteScript: async (selector, script, ...args) => helper.executeScript(script, selector, ...args),
       desiredCapabilities: helper.desiredCapabilities,
       pause: async time => helper.wait(time / 1000),
       screenshot: () => {
@@ -103,14 +108,14 @@ class VisualKnight extends Helper {
       case CODECEPTJS_HELPER.Puppeteer:
         this.visualKnightCore.options.browserName = 'Chrome';
         this.visualKnightCore.options.deviceName = 'Puppeteer';
-        screenshot = await this.puppeteerMakeScreenshot(options);
+        screenshot = await this.puppeteerMakeScreenshot(browserContext, options);
         break;
 
       default:
         throw new Error('Unkown Helper configured');
     }
 
-    return this.visualKnightCore.processScreenshot(testName, screenshot, additional);
+    return this.visualKnightCore.processScreenshot(testName, screenshot, options.additional);
   }
 
   private async protractorMakeScreenshot(
@@ -121,27 +126,42 @@ class VisualKnight extends Helper {
     browserContext.screenshot = browser.takeScreenshot;
 
     if (options.viewport) {
-      return browser.takeScreenshot();
+      await beforeScreenshot(browserContext, options);
+      const screenshot = await browser.takeScreenshot();
+      await afterScreenshot(browserContext, options);
+      return screenshot;
     }
     if (options.element) {
       return makeElementScreenshot(browserContext, options.element);
     }
-    return makeDocumentScreenshot(browserContext);
+    return makeDocumentScreenshot(browserContext, {
+      hide: options.hide,
+      remove: options.remove
+    });
   }
 
-  private async puppeteerMakeScreenshot(options: ICompareScreenshotOptions): Promise<Base64> {
+  private async puppeteerMakeScreenshot(
+    browserContext: IBrowserDriverContext,
+    options: ICompareScreenshotOptions
+  ): Promise<Base64> {
     const page = this.helpers[this.config.useHelper].page;
+
+    await beforeScreenshot(browserContext, options);
+    let screenshot;
     if (options.viewport) {
-      return page.screenshot({ encoding: 'base64' });
+      screenshot = await page.screenshot({ encoding: 'base64' });
     }
     if (options.element) {
       const element = await page.$(options.element);
-      return element.screenshot({ encoding: 'base64' });
+      screenshot = await element.screenshot({ encoding: 'base64' });
     }
-    return page.screenshot({
+    screenshot = await page.screenshot({
       fullPage: true,
       encoding: 'base64'
     });
+
+    await afterScreenshot(browserContext, options);
+    return screenshot;
   }
 
   private async webdriverIOMakeScreenshot(browserContext: IBrowserDriverContext, options: ICompareScreenshotOptions) {
@@ -151,12 +171,18 @@ class VisualKnight extends Helper {
     };
 
     if (options.viewport) {
-      return (await browser.screenshot()).value;
+      await beforeScreenshot(browserContext, options);
+      const screenshot = (await browser.screenshot()).value;
+      await afterScreenshot(browserContext, options);
+      return screenshot;
     }
     if (options.element) {
       return makeElementScreenshot(browserContext, options.element);
     }
-    return makeDocumentScreenshot(browserContext);
+    return makeDocumentScreenshot(browserContext, {
+      hide: options.hide,
+      remove: options.remove
+    });
   }
 
   private async nightmareMakeScreenshot(browserContext: IBrowserDriverContext, options: ICompareScreenshotOptions) {
@@ -166,12 +192,18 @@ class VisualKnight extends Helper {
     };
 
     if (options.viewport) {
-      return (await browser.screenshot()).toString('base64');
+      await beforeScreenshot(browserContext, options);
+      const screenshot = (await browser.screenshot()).toString('base64');
+      await afterScreenshot(browserContext, options);
+      return screenshot;
     }
     if (options.element) {
       return makeElementScreenshot(browserContext, options.element);
     }
-    return makeDocumentScreenshot(browserContext);
+    return makeDocumentScreenshot(browserContext, {
+      hide: options.hide,
+      remove: options.remove
+    });
   }
 }
 
