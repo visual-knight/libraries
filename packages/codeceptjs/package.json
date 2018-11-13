@@ -1,6 +1,6 @@
 {
   "name": "@visual-knight/codeceptjs",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The core which get used by all the other libraries",
   "main": "lib/codeceptjs.js",
   "typings": "lib/codeceptjs.d.ts",
@@ -12,7 +12,7 @@
   "author": "Mitko Tschimev <mitko@dev-thought.cool>",
   "license": "SEE LICENSE IN LICENCE",
   "dependencies": {
-    "@visual-knight/core": "^0.3.0",
+    "@visual-knight/core": "^0.4.0",
     "codeceptjs": "^1.3.3"
   },
   "publishConfig": {
