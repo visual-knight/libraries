@@ -1,7 +1,7 @@
 import * as debug from 'debug';
 
-import afterScreenshot from './afterScreenshot';
-import beforeScreenshot from './beforeScreenshot';
+import { afterScreenshot } from './afterScreenshot';
+import { beforeScreenshot } from './beforeScreenshot';
 import makeAreaScreenshot from './makeAreaScreenshot';
 
 import { IBrowserDriverContext } from './browser-context.interface';

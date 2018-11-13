@@ -6,7 +6,7 @@ import scrollbars from './scripts/scrollbars';
 
 const log = debug("visual-knight-core:afterScreenshot");
 
-export default async function afterScreenshot(browser: IBrowserDriverContext, options: any) {
+export async function afterScreenshot(browser: IBrowserDriverContext, options: any) {
   // show elements
   if (Array.isArray(options.hide) && options.hide.length) {
     log("show the following elements again: %s", options.hide.join(", "));
