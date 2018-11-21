@@ -8,7 +8,6 @@ import {
   makeElementScreenshot,
   VisualKnightCore
 } from '@visual-knight/core';
-import * as wdioScreenshot from 'wdio-screenshot';
 import {
   CODECEPTJS_HELPER,
   ICompareScreenshotOptions,
@@ -45,15 +44,6 @@ class VisualKnight extends Helper {
     }
 
     return config;
-  }
-
-  /**
-   * Hook executed before each test.
-   */
-  public _before() {
-    if (this.config.useHelper === CODECEPTJS_HELPER.WebdrvierIO) {
-      wdioScreenshot.init(this.helpers[this.config.useHelper].browser, this.config);
-    }
   }
 
   public async compareFullpageScreenshot(testName: string, options: ICompareScreenshotOptionsUser) {
