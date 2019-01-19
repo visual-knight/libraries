@@ -31,12 +31,22 @@ export class VisualKnightCore {
 
   public async processScreenshot(testname: string, screenshot: Base64, additional?: any) {
     // add error handling
+    this.debug('Requesting signed url');
     const { url, testSessionId } = await this.getPresignedUrl(testname, additional);
+    this.debug(`URL: ${url}`);
+    this.debug(`Test session id: ${testSessionId}`);
 
+    this.debug('Uploading image');
     await this.uploadScreenshot(url, new Buffer(screenshot, 'base64'));
+    this.debug('Uploading image done');
 
     // add error handling
+    this.debug('Requesting test session result');
     const testSessionData = await this.getTestSessionState(testSessionId);
+    this.debug('RESULT:');
+    this.debug(`   set mismatch tolerance: ${testSessionData.misMatchTolerance}`);
+    this.debug(`   calculated mismatch in % : ${testSessionData.misMatchPercentage}`);
+    this.debug(`   is same dimension: ${testSessionData.isSameDimensions}`);
 
     return this.processTestSessionResult(testSessionData);
   }
@@ -61,10 +71,8 @@ export class VisualKnightCore {
       options.body.additional = additional;
     }
 
-    this.debug('Requesting signed url');
     return post(this.options.apiScreenshot, options)
       .then((data: IPresigendUrlResponseData) => {
-        this.debug('Received data: ' + JSON.stringify(data));
         return data;
       })
       .catch(errorResponse => {
@@ -81,7 +89,6 @@ export class VisualKnightCore {
   }
 
   private async uploadScreenshot(presigendUrl: string, decodeedScreenshot: Buffer) {
-    this.debug('Upload image');
     return put(presigendUrl, {
       body: decodeedScreenshot,
       headers: {
@@ -136,6 +143,7 @@ export interface IPresigendUrlResponseData {
 
 export interface ITestSessionResponseData {
   misMatchPercentage: number;
+  misMatchTolerance: number;
   isSameDimensions: boolean;
   link: string;
 }
