@@ -16,7 +16,8 @@ export interface ICompareScreenshotOptionsUser {
 }
 
 export enum CODECEPTJS_HELPER {
-  WebdrvierIO = 'WebDriverIO',
+  WebdriverIO = 'WebDriverIO',
+  Webdriver = 'WebDriver',
   Puppeteer = 'Puppeteer',
   Protractor = 'Protractor',
   Nightmare = 'Nightmare'

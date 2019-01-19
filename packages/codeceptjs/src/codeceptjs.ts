@@ -83,8 +83,8 @@ class VisualKnight extends Helper {
     };
 
     switch (this.config.useHelper) {
-      case CODECEPTJS_HELPER.WebdrvierIO:
-        screenshot = await this.webdriverIOMakeScreenshot(browserContext, options);
+      case CODECEPTJS_HELPER.WebdriverIO || CODECEPTJS_HELPER.Webdriver:
+        screenshot = await this.webdriverMakeScreenshot(browserContext, options);
         break;
 
       case CODECEPTJS_HELPER.Protractor:
@@ -154,7 +154,7 @@ class VisualKnight extends Helper {
     return screenshot;
   }
 
-  private async webdriverIOMakeScreenshot(browserContext: IBrowserDriverContext, options: ICompareScreenshotOptions) {
+  private async webdriverMakeScreenshot(browserContext: IBrowserDriverContext, options: ICompareScreenshotOptions) {
     const browser = this.helpers[this.config.useHelper].browser;
     browserContext.screenshot = async () => {
       return (await browser.screenshot()).value;
