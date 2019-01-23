@@ -1,5 +1,7 @@
+// tslint:disable:no-var-keyword
+// tslint:disable:prefer-const
 export default function getScrollPosition() {
-  const docElement = document.documentElement as HTMLElement;
+  var docElement = document.documentElement as HTMLElement;
   if (typeof window.pageYOffset !== 'undefined') {
     return [window.pageXOffset, window.pageYOffset];
   } else if (typeof docElement.scrollTop !== 'undefined' && docElement.scrollTop > 0) {

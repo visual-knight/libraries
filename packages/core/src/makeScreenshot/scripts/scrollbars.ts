@@ -1,5 +1,7 @@
+// tslint:disable:no-var-keyword
+// tslint:disable:prefer-const
 export default function scrollbars(enabled: boolean) {
-  const docElement = document.documentElement as HTMLElement;
+  var docElement = document.documentElement as HTMLElement;
   if (enabled) {
     docElement.style.overflow = '';
   } else {

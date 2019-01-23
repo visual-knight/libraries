@@ -1,23 +1,25 @@
+// tslint:disable:no-var-keyword
+// tslint:disable:prefer-const
+// tslint:disable:prefer-for-of
 export default function modifyElements() {
-  const args = Array.prototype.slice.call(arguments).filter((n: string) => {
+  var args = Array.prototype.slice.call(arguments).filter((n: string) => {
     return !!n || n === '';
   });
-  const style = args[args.length - 2];
-  const value = args[args.length - 1];
+  var style = args[args.length - 2];
+  var value = args[args.length - 1];
 
   args.splice(-2);
-  // tslint:disable-next-line:prefer-for-of
   for (let i = 0; i < args.length; ++i) {
-    // tslint:disable-next-line:prefer-for-of
     for (let j = 0; j < args[i].length; ++j) {
-      const elements = document.querySelectorAll(args[i][j]);
-      elements.forEach(element => {
+      var elements = document.querySelectorAll(args[i][j]);
+      for (var k = 0; k < elements.length; k++) {
+        var element = elements[k];
         try {
           element.style.setProperty(style, value, 'important');
         } catch (error) {
           element.setAttribute('style', element.style.cssText + style + ':' + value + '!important;');
         }
-      });
+      }
     }
   }
 }

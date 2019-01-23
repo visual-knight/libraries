@@ -1,8 +1,10 @@
+// tslint:disable:no-var-keyword
+// tslint:disable:prefer-const
 import { IScreenDimensionOptions } from '../utils/ScreenDimension';
 
 export function getScreenDimensions(): IScreenDimensionOptions {
-  const body = document.body;
-  const html = document.documentElement as HTMLElement;
+  var body = document.body;
+  var html = document.documentElement as HTMLElement;
 
   return {
     window: {
