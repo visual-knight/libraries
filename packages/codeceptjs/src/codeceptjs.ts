@@ -69,6 +69,10 @@ class VisualKnight extends Helper {
 
   private async compareScreenshot(testName: string, options: ICompareScreenshotOptions = {}) {
     this.setHelper();
+    if (!options.additional) {
+      options.additional = {};
+    }
+    options.additional.capabilities = this.helper.config.capabilities || this.helper.config.desiredCapabilities;
 
     const browserContext: IBrowserDriverContext = {
       executeScript: this.helper.executeScript.bind(this.helper),
@@ -117,7 +121,7 @@ class VisualKnight extends Helper {
   private async makeScreenshot(browserContext: IBrowserDriverContext, options: ICompareScreenshotOptions) {
     if (this.helpers[CODECEPTJS_HELPER.Puppeteer]) {
       this.visualKnightCore.options.browserName = 'Chrome';
-      this.visualKnightCore.options.deviceName = 'Puppeteer';
+      this.visualKnightCore.options.os = 'Puppeteer';
       return await this.puppeteerMakeScreenshot(browserContext, options);
     }
     if (this.helpers[CODECEPTJS_HELPER.Webdriver] || this.helpers[CODECEPTJS_HELPER.WebdriverIO]) {
