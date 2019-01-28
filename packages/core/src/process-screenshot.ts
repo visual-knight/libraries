@@ -52,9 +52,7 @@ export class VisualKnightCore {
   }
 
   private async getPresignedUrl(testname: string, additional: any = {}) {
-    if (!additional.capabilities) {
-      additional.capabilities = {};
-    }
+    additional.capabilities = additional.capabilities || {};
     const options: RequestPromiseOptions = {
       method: 'POST',
       body: {
