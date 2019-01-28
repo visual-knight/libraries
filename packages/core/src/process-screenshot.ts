@@ -12,8 +12,8 @@ export class VisualKnightCore {
         liveResult: true,
         misMatchTolerance: 0.01,
         autoBaseline: false,
-        debugLogger(message) {
-          console.debug(message);
+        debugLogger() {
+          // do nothing
         }
       },
       ...options
@@ -51,19 +51,14 @@ export class VisualKnightCore {
     return this.processTestSessionResult(testSessionData);
   }
 
-  private async getPresignedUrl(testname: string, additional: any = { capabilities: {} }) {
+  private async getPresignedUrl(testname: string, additional: any = {}) {
+    additional.capabilities = additional.capabilities || {};
     if (this.options.browserName) {
       additional.capabilities.browserName = this.options.browserName;
-    }
-    if (this.options.os) {
-      additional.capabilities.os = this.options.os;
     }
     if (this.options.deviceName) {
       additional.capabilities.deviceName = this.options.deviceName;
     }
-
-    console.log('Additional');
-    console.log(additional);
 
     const options: RequestPromiseOptions = {
       method: 'POST',
