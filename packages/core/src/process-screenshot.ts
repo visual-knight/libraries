@@ -52,14 +52,6 @@ export class VisualKnightCore {
   }
 
   private async getPresignedUrl(testname: string, additional: any = {}) {
-    additional.capabilities = additional.capabilities || {};
-    if (this.options.browserName) {
-      additional.capabilities.browserName = this.options.browserName;
-    }
-    if (this.options.deviceName) {
-      additional.capabilities.deviceName = this.options.deviceName;
-    }
-
     const options: RequestPromiseOptions = {
       method: 'POST',
       body: {
@@ -161,8 +153,6 @@ interface IProcessScreenshotOptions extends IProcessScreenshotOptionsUser {
 export interface IProcessScreenshotOptionsUser {
   key: string;
   project: string;
-  browserName?: string;
-  deviceName?: string;
   autoBaseline?: boolean;
   apiScreenshot?: string;
   apiTestsessionState?: string;
