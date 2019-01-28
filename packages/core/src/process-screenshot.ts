@@ -163,7 +163,6 @@ export interface IProcessScreenshotOptionsUser {
   project: string;
   browserName?: string;
   deviceName?: string;
-  os?: string;
   autoBaseline?: boolean;
   apiScreenshot?: string;
   apiTestsessionState?: string;
