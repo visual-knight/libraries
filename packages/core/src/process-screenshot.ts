@@ -12,8 +12,8 @@ export class VisualKnightCore {
         liveResult: true,
         misMatchTolerance: 0.01,
         autoBaseline: false,
-        debugLogger(message) {
-          console.debug(message);
+        debugLogger() {
+          // do nothing
         }
       },
       ...options
@@ -51,25 +51,20 @@ export class VisualKnightCore {
     return this.processTestSessionResult(testSessionData);
   }
 
-  private async getPresignedUrl(testname: string, additional: any) {
-    // this.debugSection("Visual Knight", "Requesting signed url");
+  private async getPresignedUrl(testname: string, additional: any = {}) {
+    additional.capabilities = additional.capabilities || {};
     const options: RequestPromiseOptions = {
       method: 'POST',
       body: {
         test: testname,
         project: this.options.project,
         misMatchTolerance: this.options.misMatchTolerance,
-        browserName: this.options.browserName,
-        deviceName: this.options.deviceName,
-        autoBaseline: this.options.autoBaseline
+        autoBaseline: this.options.autoBaseline,
+        additional
       },
       headers: this.headers,
       json: true
     };
-
-    if (additional) {
-      options.body.additional = additional;
-    }
 
     return post(this.options.apiScreenshot, options)
       .then((data: IPresigendUrlResponseData) => {
@@ -159,8 +154,6 @@ interface IProcessScreenshotOptions extends IProcessScreenshotOptionsUser {
 export interface IProcessScreenshotOptionsUser {
   key: string;
   project: string;
-  browserName: string;
-  deviceName: string;
   autoBaseline?: boolean;
   apiScreenshot?: string;
   apiTestsessionState?: string;
