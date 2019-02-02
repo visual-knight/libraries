@@ -103,7 +103,7 @@ export class VisualKnightCore {
 
   private processTestSessionResult(result: ITestSessionResponseData) {
     const { misMatchPercentage, isSameDimensions, link } = result;
-    const misMatchTolerance = this.options.misMatchTolerance * 100;
+    const { misMatchTolerance } = this.options;
 
     const error = new Error();
 
@@ -122,12 +122,19 @@ export class VisualKnightCore {
 
     // this.debugSection("Visual Knight", `Image is different! ${misMatchPercentage}%`);
     if (misMatchPercentage && misMatchPercentage > misMatchTolerance) {
-      error.message = `Mismatch is greater than the tolerance! -> ${link}`;
+      error.message = `Mismatch of ${this.round(misMatchPercentage, 3)} % is greater than the tolerance ${this.round(
+        misMatchTolerance,
+        3
+      )} %! -> ${link}`;
       error.name = 'MisMatchPercentageError';
       throw error;
     }
 
     // this.debugSection("Visual Knight", `Image is within tolerance or the same`);
+  }
+
+  private round(value: number, decimals: number) {
+    return Number(Math.round(Number(`${value}e${decimals}`)) + `e-${decimals}`);
   }
 }
 

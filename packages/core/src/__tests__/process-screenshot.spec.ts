@@ -7,15 +7,13 @@ describe('process-screenshot', () => {
   beforeEach(() => {
     visualKnightCore = new VisualKnightCore({
       key: 'Some Key',
-      project: 'Some Project',
-      browserName: 'Some Browser',
-      deviceName: 'Some Device'
+      project: 'Some Project'
     });
   });
 
   it('should return positive feedback', done => {
     get.mockResolvedValueOnce({
-      misMatchPercentage: 1,
+      misMatchPercentage: 0.01,
       isSameDimensions: true,
       link: 'some link'
     });
@@ -32,7 +30,7 @@ describe('process-screenshot', () => {
 
   it('should upload image to the url from api', done => {
     get.mockResolvedValueOnce({
-      misMatchPercentage: 1,
+      misMatchPercentage: 0.01,
       isSameDimensions: true,
       link: 'some link'
     });
@@ -55,7 +53,7 @@ describe('process-screenshot', () => {
 
   it('should reject with an error if the dimensions are not correct', done => {
     get.mockResolvedValueOnce({
-      misMatchPercentage: 1,
+      misMatchPercentage: 0.01,
       isSameDimensions: false,
       link: 'some link'
     });
@@ -75,7 +73,7 @@ describe('process-screenshot', () => {
 
   it('should reject with an error if the misMatchPercentage is smaller then the misMatchTolerance', done => {
     get.mockResolvedValueOnce({
-      misMatchPercentage: 2,
+      misMatchPercentage: 0.02,
       isSameDimensions: true,
       link: 'some link'
     });
@@ -148,7 +146,7 @@ describe('process-screenshot', () => {
 
   it('should append the additional data to the body', done => {
     get.mockResolvedValueOnce({
-      misMatchPercentage: 1,
+      misMatchPercentage: 0.01,
       isSameDimensions: true,
       link: 'some link'
     });
@@ -179,7 +177,7 @@ describe('process-screenshot', () => {
 
   it('should set autoBaseline to false as default to the body', done => {
     get.mockResolvedValueOnce({
-      misMatchPercentage: 1,
+      misMatchPercentage: 0.01,
       isSameDimensions: true,
       link: 'some link'
     });
