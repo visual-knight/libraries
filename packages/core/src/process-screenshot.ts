@@ -1,4 +1,4 @@
-import { get, post, put, RequestPromiseOptions } from 'request-promise';
+import axios from 'axios';
 
 export class VisualKnightCore {
   public options: IProcessScreenshotOptions;
@@ -7,8 +7,7 @@ export class VisualKnightCore {
   constructor(options: IProcessScreenshotOptionsUser) {
     this.options = {
       ...{
-        apiScreenshot: `https://api-screenshot.visual-knight.io/v1`,
-        apiTestsessionState: `https://api-testsession.visual-knight.io/v1`,
+        apiEndpoint: `https://api.visual-knight.io/v1`,
         liveResult: true,
         misMatchTolerance: 0.01,
         autoBaseline: false,
@@ -32,17 +31,17 @@ export class VisualKnightCore {
   public async processScreenshot(testname: string, screenshot: Base64, additional?: any) {
     // add error handling
     this.debug('Requesting signed url');
-    const { url, testSessionId } = await this.getPresignedUrl(testname, additional);
-    this.debug(`URL: ${url}`);
+    const testSessionId = await this.invokeTestSession(testname, additional);
     this.debug(`Test session id: ${testSessionId}`);
 
     this.debug('Uploading image');
-    await this.uploadScreenshot(url, new Buffer(screenshot, 'base64'));
+    await this.uploadScreenshot(new Buffer(screenshot, 'base64'), testSessionId);
     this.debug('Uploading image done');
 
     // add error handling
     this.debug('Requesting test session result');
     const testSessionData = await this.getTestSessionState(testSessionId);
+    console.log(testSessionData);
     this.debug('RESULT:');
     this.debug(`   set mismatch tolerance: ${testSessionData.misMatchTolerance}`);
     this.debug(`   calculated mismatch in % : ${testSessionData.misMatchPercentage}`);
@@ -51,54 +50,113 @@ export class VisualKnightCore {
     return this.processTestSessionResult(testSessionData);
   }
 
-  private async getPresignedUrl(testname: string, additional: any = {}) {
+  private async invokeTestSession(testname: string, additional: any = {}) {
     additional.capabilities = additional.capabilities || {};
-    const options: RequestPromiseOptions = {
-      method: 'POST',
-      body: {
-        test: testname,
+    const data = {
+      query: `
+        mutation invokeTestSession(
+          $autoBaseline: Boolean!
+          $capabilities: JSON!
+          $misMatchTolerance: Float!
+          $project: String!
+          $testname: String!
+        ) {
+          invokeTestSession(
+            autoBaseline: $autoBaseline
+            capabilities: $capabilities
+            misMatchTolerance: $misMatchTolerance
+            project: $project
+            testname: $testname
+          )
+        }
+      `,
+      operationName: 'invokeTestSession',
+      variables: {
+        testname,
         project: this.options.project,
         misMatchTolerance: this.options.misMatchTolerance,
         autoBaseline: this.options.autoBaseline,
-        additional
-      },
-      headers: this.headers,
-      json: true
+        capabilities: additional.capabilities
+        // TODO: add additional information
+      }
     };
 
-    return post(this.options.apiScreenshot, options)
-      .then((data: IPresigendUrlResponseData) => {
-        return data;
-      })
-      .catch(errorResponse => {
-        switch (errorResponse.statusCode) {
-          case 400:
-            throw new Error('Not all required fields are set.');
-          case 403:
-            throw new Error('Not Authorized! Check if your key is set correct.');
-
-          default:
-            throw errorResponse;
+    try {
+      const response = await axios.post<
+        string,
+        {
+          data: { data: { invokeTestSession: string } };
         }
+      >(this.options.apiEndpoint, data, {
+        headers: this.headers
       });
+      return response.data.data.invokeTestSession;
+    } catch (error) {
+      this.debug(error);
+      switch (error.statusCode) {
+        case 400:
+          throw new Error('Not all required fields are set.');
+        case 403:
+          throw new Error('Not Authorized! Check if your key is set correct.');
+
+        default:
+          throw error;
+      }
+    }
   }
 
-  private async uploadScreenshot(presigendUrl: string, decodeedScreenshot: Buffer) {
-    return put(presigendUrl, {
-      body: decodeedScreenshot,
-      headers: {
-        'Content-Type': 'image/png'
-      }
-    });
+  private async uploadScreenshot(decodedScreenshot: Buffer, testSessionId: string) {
+    const data = {
+      query: `
+          mutation uploadScreenshot($testSessionId: String!, $base64Image: String!) {
+            uploadScreenshot(
+              testSessionId: $testSessionId
+              base64Image: $base64Image
+            )
+          }
+        `,
+      operationName: 'uploadScreenshot',
+      variables: { testSessionId, base64Image: decodedScreenshot.toString('base64') }
+    };
+
+    try {
+      return (await axios.post<
+        string,
+        {
+          data: { data: { uploadScreenshot: boolean } };
+        }
+      >(this.options.apiEndpoint, data, { headers: this.headers })).data.data.uploadScreenshot;
+    } catch (error) {
+      throw error;
+    }
   }
 
   private async getTestSessionState(testSessionId: string) {
-    return get(`${this.options.apiTestsessionState}?testSessionId=${testSessionId}`, {
-      headers: this.headers,
-      json: true
-    }).then((data: ITestSessionResponseData) => {
-      return data;
-    });
+    const data = {
+      query: `
+        query testSessionWatch($testSessionId: String!) {
+          testSessionWatch(testSessionId: $testSessionId) {
+            misMatchPercentage
+            misMatchTolerance
+            isSameDimensions
+            link
+          }
+        }
+      `,
+      operationName: 'testSessionWatch',
+      variables: { testSessionId }
+    };
+
+    try {
+      return (await axios.post<
+        string,
+        {
+          data: { data: { testSessionWatch: ITestSessionResponseData } };
+        }
+      >(this.options.apiEndpoint, data, { headers: this.headers })).data.data.testSessionWatch;
+    } catch (error) {
+      throw error;
+    }
   }
 
   private processTestSessionResult(result: ITestSessionResponseData) {
@@ -138,11 +196,6 @@ export class VisualKnightCore {
   }
 }
 
-export interface IPresigendUrlResponseData {
-  url: string;
-  testSessionId: string;
-}
-
 export interface ITestSessionResponseData {
   misMatchPercentage: number;
   misMatchTolerance: number;
@@ -151,8 +204,7 @@ export interface ITestSessionResponseData {
 }
 
 interface IProcessScreenshotOptions extends IProcessScreenshotOptionsUser {
-  apiScreenshot: string;
-  apiTestsessionState: string;
+  apiEndpoint: string;
   misMatchTolerance: number;
   liveResult: boolean;
   debugLogger: (message: string) => void;
@@ -162,8 +214,7 @@ export interface IProcessScreenshotOptionsUser {
   key: string;
   project: string;
   autoBaseline?: boolean;
-  apiScreenshot?: string;
-  apiTestsessionState?: string;
+  apiEndpoint?: string;
   misMatchTolerance?: number;
   liveResult?: boolean;
 }
