@@ -5,7 +5,7 @@
   "version": "1.0.2",
   "command": {
     "publish": {
-      "allowBranch": "master"
+      "allowBranch": ["master", "feat/community-version"]
     }
   }
 }
