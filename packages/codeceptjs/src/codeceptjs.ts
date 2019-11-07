@@ -92,6 +92,12 @@ class VisualKnight extends Helper {
   private setHelper() {
     if (this.helpers[CODECEPTJS_HELPER.Puppeteer]) {
       this.helper = this.helpers[CODECEPTJS_HELPER.Puppeteer];
+      this.helper.config.capabilities = this.helper.config.capabilities || this.helper.config.desiredCapabilities || {};
+      this.helper.config.capabilities = {
+        browserName: 'Chrome',
+        platform: 'Puppeteer',
+        ...this.helper.config.capabilities
+      };
       return;
     }
     if (this.helpers[CODECEPTJS_HELPER.Webdriver]) {
@@ -112,9 +118,7 @@ class VisualKnight extends Helper {
     }
 
     throw new Error(
-      `Supported Helpers are: ${CODECEPTJS_HELPER.Webdriver}, ${CODECEPTJS_HELPER.Puppeteer}, ${
-        CODECEPTJS_HELPER.Protractor
-      }, ${CODECEPTJS_HELPER.Nightmare}`
+      `Supported Helpers are: ${CODECEPTJS_HELPER.Webdriver}, ${CODECEPTJS_HELPER.Puppeteer}, ${CODECEPTJS_HELPER.Protractor}, ${CODECEPTJS_HELPER.Nightmare}`
     );
   }
 
