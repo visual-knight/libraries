@@ -34,14 +34,9 @@ export class VisualKnightCore {
     const testSessionId = await this.invokeTestSession(testname, additional);
     this.debug(`Test session id: ${testSessionId}`);
 
-    this.debug('Uploading image');
-    await this.uploadScreenshot(new Buffer(screenshot, 'base64'), testSessionId);
-    this.debug('Uploading image done');
+    this.debug('Uploading image and get test data');
+    const testSessionData = await this.uploadScreenshot(Buffer.from(screenshot, 'base64'), testSessionId);
 
-    // add error handling
-    this.debug('Requesting test session result');
-    const testSessionData = await this.getTestSessionState(testSessionId);
-    console.log(testSessionData);
     this.debug('RESULT:');
     this.debug(`   set mismatch tolerance: ${testSessionData.misMatchTolerance}`);
     this.debug(`   calculated mismatch in % : ${testSessionData.misMatchPercentage}`);
@@ -80,7 +75,6 @@ export class VisualKnightCore {
         // TODO: add additional information
       }
     };
-
     try {
       const response = await axios.post<
         string,
@@ -112,7 +106,12 @@ export class VisualKnightCore {
             uploadScreenshot(
               testSessionId: $testSessionId
               base64Image: $base64Image
-            )
+            ) {
+              misMatchPercentage
+              misMatchTolerance
+              isSameDimensions
+              link
+            }
           }
         `,
       operationName: 'uploadScreenshot',
@@ -123,37 +122,9 @@ export class VisualKnightCore {
       return (await axios.post<
         string,
         {
-          data: { data: { uploadScreenshot: boolean } };
+          data: { data: { uploadScreenshot: ITestSessionResponseData } };
         }
       >(this.options.apiEndpoint, data, { headers: this.headers })).data.data.uploadScreenshot;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  private async getTestSessionState(testSessionId: string) {
-    const data = {
-      query: `
-        query testSessionWatch($testSessionId: String!) {
-          testSessionWatch(testSessionId: $testSessionId) {
-            misMatchPercentage
-            misMatchTolerance
-            isSameDimensions
-            link
-          }
-        }
-      `,
-      operationName: 'testSessionWatch',
-      variables: { testSessionId }
-    };
-
-    try {
-      return (await axios.post<
-        string,
-        {
-          data: { data: { testSessionWatch: ITestSessionResponseData } };
-        }
-      >(this.options.apiEndpoint, data, { headers: this.headers })).data.data.testSessionWatch;
     } catch (error) {
       throw error;
     }
