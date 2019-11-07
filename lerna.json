@@ -2,10 +2,13 @@
   "packages": [
     "packages/*"
   ],
-  "version": "1.0.2",
+  "version": "2.0.0-alpha.0",
   "command": {
     "publish": {
-      "allowBranch": ["master", "feat/community-version"]
+      "allowBranch": [
+        "master",
+        "feat/community-version"
+      ]
     }
   }
 }
