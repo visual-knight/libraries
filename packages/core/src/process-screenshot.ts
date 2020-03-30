@@ -7,7 +7,6 @@ export class VisualKnightCore {
   constructor(options: IProcessScreenshotOptionsUser) {
     this.options = {
       ...{
-        apiEndpoint: `https://api.visual-knight.io/v1`,
         liveResult: true,
         misMatchTolerance: 0.01,
         autoBaseline: false,
@@ -28,25 +27,38 @@ export class VisualKnightCore {
     this.options.debugLogger('Visual Knight: ' + message);
   }
 
-  public async processScreenshot(testname: string, screenshot: Base64, additional?: any) {
+  public async processScreenshot(
+    testname: string,
+    screenshot: Base64,
+    capabilities: IDesiredCapabilities
+  ) {
     // add error handling
     this.debug('Requesting signed url');
-    const testSessionId = await this.invokeTestSession(testname, additional);
+    const testSessionId = await this.invokeTestSession(testname, capabilities);
     this.debug(`Test session id: ${testSessionId}`);
 
     this.debug('Uploading image and get test data');
-    const testSessionData = await this.uploadScreenshot(Buffer.from(screenshot, 'base64'), testSessionId);
+    const testSessionData = await this.uploadScreenshot(
+      Buffer.from(screenshot, 'base64'),
+      testSessionId
+    );
 
     this.debug('RESULT:');
-    this.debug(`   set mismatch tolerance: ${testSessionData.misMatchTolerance}`);
-    this.debug(`   calculated mismatch in % : ${testSessionData.misMatchPercentage}`);
+    this.debug(
+      `   set mismatch tolerance: ${testSessionData.misMatchTolerance}`
+    );
+    this.debug(
+      `   calculated mismatch in % : ${testSessionData.misMatchPercentage}`
+    );
     this.debug(`   is same dimension: ${testSessionData.isSameDimensions}`);
 
     return this.processTestSessionResult(testSessionData);
   }
 
-  private async invokeTestSession(testname: string, additional: any = {}) {
-    additional.capabilities = additional.capabilities || {};
+  private async invokeTestSession(
+    testname: string,
+    capabilities: IDesiredCapabilities
+  ) {
     const data = {
       query: `
         mutation invokeTestSession(
@@ -71,8 +83,7 @@ export class VisualKnightCore {
         project: this.options.project,
         misMatchTolerance: this.options.misMatchTolerance,
         autoBaseline: this.options.autoBaseline,
-        capabilities: additional.capabilities
-        // TODO: add additional information
+        capabilities
       }
     };
     try {
@@ -94,12 +105,15 @@ export class VisualKnightCore {
           throw new Error('Not Authorized! Check if your key is set correct.');
 
         default:
-          throw error;
+          throw new Error(error.message);
       }
     }
   }
 
-  private async uploadScreenshot(decodedScreenshot: Buffer, testSessionId: string) {
+  private async uploadScreenshot(
+    decodedScreenshot: Buffer,
+    testSessionId: string
+  ) {
     const data = {
       query: `
           mutation uploadScreenshot($testSessionId: String!, $base64Image: String!) {
@@ -115,33 +129,35 @@ export class VisualKnightCore {
           }
         `,
       operationName: 'uploadScreenshot',
-      variables: { testSessionId, base64Image: decodedScreenshot.toString('base64') }
+      variables: {
+        testSessionId,
+        base64Image: decodedScreenshot.toString('base64')
+      }
     };
 
-    try {
-      return (await axios.post<
+    return axios
+      .post<
         string,
         {
           data: { data: { uploadScreenshot: ITestSessionResponseData } };
         }
-      >(this.options.apiEndpoint, data, { headers: this.headers })).data.data.uploadScreenshot;
-    } catch (error) {
-      throw error;
-    }
+      >(this.options.apiEndpoint, data, { headers: this.headers })
+      .then(result => result.data.data.uploadScreenshot)
+      .catch(error => {
+        this.debug(error);
+        throw error;
+      });
   }
 
   private processTestSessionResult(result: ITestSessionResponseData) {
-    const { misMatchPercentage, isSameDimensions, link } = result;
-    const { misMatchTolerance } = this.options;
+    const {
+      misMatchPercentage,
+      isSameDimensions,
+      link,
+      misMatchTolerance
+    } = result;
 
     const error = new Error();
-
-    if (result && misMatchPercentage === null && isSameDimensions !== false) {
-      this.debug('No baseline defined');
-      error.message = `For this image is no baseline defined! -> ${link}`;
-      error.name = 'NoBaselineError';
-      throw error;
-    }
 
     if (!isSameDimensions) {
       error.message = `Compared Screenshots are not in the same dimension! -> ${link}`;
@@ -149,26 +165,22 @@ export class VisualKnightCore {
       throw error;
     }
 
-    // this.debugSection("Visual Knight", `Image is different! ${misMatchPercentage}%`);
-    if (misMatchPercentage && misMatchPercentage > misMatchTolerance) {
-      error.message = `Mismatch of ${this.round(misMatchPercentage, 3)} % is greater than the tolerance ${this.round(
-        misMatchTolerance,
-        3
-      )} %! -> ${link}`;
-      error.name = 'MisMatchPercentageError';
+    if (misMatchPercentage === null) {
+      error.message = `For this image is no baseline defined! -> ${link}`;
+      error.name = 'NoBaselineError';
       throw error;
     }
 
-    // this.debugSection("Visual Knight", `Image is within tolerance or the same`);
-  }
-
-  private round(value: number, decimals: number) {
-    return Number(Math.round(Number(`${value}e${decimals}`)) + `e-${decimals}`);
+    if (misMatchPercentage > misMatchTolerance) {
+      error.message = `Mismatch of ${misMatchPercentage} % is greater than the tolerance ${misMatchTolerance} %! -> ${link}`;
+      error.name = 'MisMatchPercentageError';
+      throw error;
+    }
   }
 }
 
 export interface ITestSessionResponseData {
-  misMatchPercentage: number;
+  misMatchPercentage: number | null;
   misMatchTolerance: number;
   isSameDimensions: boolean;
   link: string;
@@ -184,10 +196,22 @@ interface IProcessScreenshotOptions extends IProcessScreenshotOptionsUser {
 export interface IProcessScreenshotOptionsUser {
   key: string;
   project: string;
+  apiEndpoint: string;
   autoBaseline?: boolean;
-  apiEndpoint?: string;
   misMatchTolerance?: number;
   liveResult?: boolean;
+}
+
+export interface IDesiredCapabilities {
+  device?: string;
+  browserName?: string;
+  deviceName?: string;
+  platformName?: string;
+  platformVersion?: string;
+  platform?: string;
+  os?: string;
+  os_version?: string;
+  version?: string;
 }
 
 export type Base64 = string;
