@@ -1,208 +1,283 @@
-import { get, post, put } from '../__mocks__/request-promise';
-import { VisualKnightCore } from '../process-screenshot';
+import axios from 'axios';
+import {
+  IDesiredCapabilities,
+  IProcessScreenshotOptionsUser,
+  ITestSessionResponseData,
+  VisualKnightCore
+} from '../process-screenshot';
 
 describe('process-screenshot', () => {
+  const options: IProcessScreenshotOptionsUser = {
+    key: 'Some Key',
+    project: 'Some Project',
+    apiEndpoint: 'Some url',
+    autoBaseline: true,
+    misMatchTolerance: 0.15
+  };
   let visualKnightCore: VisualKnightCore;
 
   beforeEach(() => {
-    visualKnightCore = new VisualKnightCore({
-      key: 'Some Key',
-      project: 'Some Project'
+    visualKnightCore = new VisualKnightCore(options);
+  });
+
+  describe('processTestSessionResult', () => {
+    const successTestSessionResult: ITestSessionResponseData = {
+      misMatchTolerance: 0.01,
+      misMatchPercentage: 0,
+      isSameDimensions: true,
+      link: 'url'
+    };
+
+    it('should return undefined if no errors', () => {
+      const testSessionResult = successTestSessionResult;
+
+      const result = visualKnightCore['processTestSessionResult'](
+        testSessionResult
+      );
+
+      expect(result).toBe(undefined);
+    });
+
+    it('should throw error if no baseline', () => {
+      const testSessionResult = {
+        ...successTestSessionResult,
+        misMatchPercentage: null
+      };
+      const expectedError = new Error();
+      expectedError.message = `For this image is no baseline defined! -> ${testSessionResult.link}`;
+      expectedError.name = 'NoBaselineError';
+
+      expect(() =>
+        visualKnightCore['processTestSessionResult'](testSessionResult)
+      ).toThrowError(expectedError);
+    });
+
+    it('should throw error if not the same dimension', () => {
+      const testSessionResult = {
+        ...successTestSessionResult,
+        isSameDimensions: false
+      };
+      const expectedError = new Error();
+      expectedError.message = `Compared Screenshots are not in the same dimension! -> ${testSessionResult.link}`;
+      expectedError.name = 'IsSameDimensionsError';
+
+      expect(() =>
+        visualKnightCore['processTestSessionResult'](testSessionResult)
+      ).toThrowError(expectedError);
+    });
+
+    it('should throw error if mismatch > tollerance', () => {
+      const testSessionResult = {
+        ...successTestSessionResult,
+        misMatchPercentage: 0.02,
+        misMatchTolerance: 0.01
+      };
+      const expectedError = new Error();
+      expectedError.message = `Mismatch of ${testSessionResult.misMatchPercentage} % is greater than the tolerance ${testSessionResult.misMatchTolerance} %! -> ${testSessionResult.link}`;
+      expectedError.name = 'MisMatchPercentageError';
+
+      expect(() =>
+        visualKnightCore['processTestSessionResult'](testSessionResult)
+      ).toThrowError(expectedError);
     });
   });
 
-  it('should return positive feedback', done => {
-    get.mockResolvedValueOnce({
-      misMatchPercentage: 0.01,
+  describe('uploadScreenshot', () => {
+    const successTestSessionResult: ITestSessionResponseData = {
+      misMatchTolerance: 0.01,
+      misMatchPercentage: 0,
       isSameDimensions: true,
-      link: 'some link'
-    });
+      link: 'url'
+    };
 
-    post.mockResolvedValueOnce({
-      url: 'Some presigned url',
-      testSessionId: 'Some testSessionId'
-    });
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT').then(() => {
-      done();
-    });
-  });
-
-  it('should upload image to the url from api', done => {
-    get.mockResolvedValueOnce({
-      misMatchPercentage: 0.01,
-      isSameDimensions: true,
-      link: 'some link'
-    });
-
-    post.mockResolvedValueOnce({
-      url: 'Some presigned url',
-      testSessionId: 'Some testSessionId'
-    });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT').then(() => {
-      expect(put).toBeCalledWith('Some presigned url', {
-        body: new Buffer('SCREENSHOT', 'base64'),
-        headers: { 'Content-Type': 'image/png' }
+    it('should upload with success', async () => {
+      const image = new Buffer('SCREENSHOT');
+      const testSessionId = 'Some testSessionId';
+      axios.post = jest.fn().mockResolvedValueOnce({
+        data: {
+          data: { uploadScreenshot: successTestSessionResult }
+        }
       });
-      done();
-    });
-  });
 
-  it('should reject with an error if the dimensions are not correct', done => {
-    get.mockResolvedValueOnce({
-      misMatchPercentage: 0.01,
-      isSameDimensions: false,
-      link: 'some link'
-    });
+      const result = await visualKnightCore['uploadScreenshot'](
+        image,
+        testSessionId
+      );
 
-    post.mockResolvedValueOnce({
-      url: 'Some presigned url',
-      testSessionId: 'Some testSessionId'
-    });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT').catch((error: Error) => {
-      expect(error.name).toBe('IsSameDimensionsError');
-      done();
-    });
-  });
-
-  it('should reject with an error if the misMatchPercentage is smaller then the misMatchTolerance', done => {
-    get.mockResolvedValueOnce({
-      misMatchPercentage: 0.02,
-      isSameDimensions: true,
-      link: 'some link'
-    });
-
-    post.mockResolvedValueOnce({
-      url: 'Some presigned url',
-      testSessionId: 'Some testSessionId'
-    });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT').catch((error: Error) => {
-      expect(error.name).toBe('MisMatchPercentageError');
-      done();
-    });
-  });
-
-  it('should reject with an error if there is no baseline', done => {
-    get.mockResolvedValueOnce({
-      misMatchPercentage: null,
-      isSameDimensions: true,
-      link: 'some link'
-    });
-
-    post.mockResolvedValueOnce({
-      url: 'Some presigned url',
-      testSessionId: 'Some testSessionId'
-    });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT').catch((error: Error) => {
-      expect(error.name).toBe('NoBaselineError');
-      done();
-    });
-  });
-
-  it('should reject with an error if the upload of the image does not have all fields', done => {
-    post.mockRejectedValueOnce({ statusCode: 400 });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT').catch((error: Error) => {
-      expect(error).toEqual(new Error('Not all required fields are set.'));
-      done();
-    });
-  });
-
-  it('should reject with an error if the upload is not authorized', done => {
-    post.mockRejectedValueOnce({ statusCode: 403 });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT').catch((error: Error) => {
-      expect(error).toEqual(new Error('Not Authorized! Check if your key is set correct.'));
-      done();
-    });
-  });
-
-  it('should reject with the server error response if it is an unknown code', done => {
-    post.mockRejectedValueOnce({ unknown: true });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT').catch((error: Error) => {
-      expect(error).toEqual({ unknown: true });
-      done();
-    });
-  });
-
-  it('should append the additional data to the body', done => {
-    get.mockResolvedValueOnce({
-      misMatchPercentage: 0.01,
-      isSameDimensions: true,
-      link: 'some link'
-    });
-
-    post.mockResolvedValueOnce({
-      url: 'Some presigned url',
-      testSessionId: 'Some testSessionId'
-    });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT', { someAdditionalData: true }).then(() => {
-      expect(post).toBeCalledWith('https://api-screenshot.visual-knight.io/v1', {
-        body: {
-          misMatchTolerance: 0.01,
-          project: 'Some Project',
-          test: 'testname',
-          additional: { someAdditionalData: true, capabilities: {} },
-          autoBaseline: false
+      expect(result).toBe(successTestSessionResult);
+      expect(axios.post).toHaveBeenCalledWith(
+        options.apiEndpoint,
+        {
+          query: `
+          mutation uploadScreenshot($testSessionId: String!, $base64Image: String!) {
+            uploadScreenshot(
+              testSessionId: $testSessionId
+              base64Image: $base64Image
+            ) {
+              misMatchPercentage
+              misMatchTolerance
+              isSameDimensions
+              link
+            }
+          }
+        `,
+          operationName: 'uploadScreenshot',
+          variables: { testSessionId, base64Image: image.toString('base64') }
         },
-        headers: { 'Content-Type': 'application/json', 'x-api-key': 'Some Key' },
-        json: true,
-        method: 'POST'
-      });
-      done();
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': options.key
+          }
+        }
+      );
+    });
+
+    it('should throw error', async () => {
+      const image = new Buffer('SCREENSHOT');
+      const testSessionId = 'Some testSessionId';
+      axios.post = jest.fn().mockRejectedValueOnce(new Error('Some error'));
+
+      await expect(
+        visualKnightCore['uploadScreenshot'](image, testSessionId)
+      ).rejects.toThrowError(new Error('Some error'));
     });
   });
 
-  it('should set autoBaseline to false as default to the body', done => {
-    get.mockResolvedValueOnce({
-      misMatchPercentage: 0.01,
-      isSameDimensions: true,
-      link: 'some link'
-    });
+  describe('invokeTestSession', () => {
+    const testname = 'Some name';
+    const capabilities: IDesiredCapabilities = {
+      os: 'Windows',
+      browserName: 'Chrome'
+    };
 
-    post.mockResolvedValueOnce({
-      url: 'Some presigned url',
-      testSessionId: 'Some testSessionId'
-    });
-
-    expect.assertions(1);
-
-    visualKnightCore.processScreenshot('testname', 'SCREENSHOT', { someAdditionalData: true }).then(() => {
-      expect(post).toBeCalledWith('https://api-screenshot.visual-knight.io/v1', {
-        body: {
-          misMatchTolerance: 0.01,
-          project: 'Some Project',
-          test: 'testname',
-          additional: { someAdditionalData: true, capabilities: {} },
-          autoBaseline: false
-        },
-        headers: { 'Content-Type': 'application/json', 'x-api-key': 'Some Key' },
-        json: true,
-        method: 'POST'
+    it('should invoke test session', async () => {
+      const expectedTestSession = 'Some testSession';
+      axios.post = jest.fn().mockResolvedValueOnce({
+        data: {
+          data: { invokeTestSession: expectedTestSession }
+        }
       });
-      done();
+
+      const result = await visualKnightCore['invokeTestSession'](
+        testname,
+        capabilities
+      );
+
+      expect(result).toBe(expectedTestSession);
+      expect(axios.post).toHaveBeenCalledWith(
+        options.apiEndpoint,
+        {
+          query: `
+        mutation invokeTestSession(
+          $autoBaseline: Boolean!
+          $capabilities: JSON!
+          $misMatchTolerance: Float!
+          $project: String!
+          $testname: String!
+        ) {
+          invokeTestSession(
+            autoBaseline: $autoBaseline
+            capabilities: $capabilities
+            misMatchTolerance: $misMatchTolerance
+            project: $project
+            testname: $testname
+          )
+        }
+      `,
+          operationName: 'invokeTestSession',
+          variables: {
+            testname,
+            project: options.project,
+            misMatchTolerance: options.misMatchTolerance,
+            autoBaseline: options.autoBaseline,
+            capabilities
+          }
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': options.key
+          }
+        }
+      );
+    });
+
+    it('should throw error for code 400', async () => {
+      axios.post = jest.fn().mockRejectedValueOnce({
+        statusCode: 400
+      });
+
+      await expect(
+        visualKnightCore['invokeTestSession'](testname, capabilities)
+      ).rejects.toThrowError(new Error('Not all required fields are set.'));
+    });
+
+    it('should throw error for code 403', async () => {
+      axios.post = jest.fn().mockRejectedValueOnce({
+        statusCode: 403
+      });
+
+      await expect(
+        visualKnightCore['invokeTestSession'](testname, capabilities)
+      ).rejects.toThrowError(
+        new Error('Not Authorized! Check if your key is set correct.')
+      );
+    });
+
+    it('should throw error for unknown code', async () => {
+      axios.post = jest.fn().mockRejectedValueOnce({
+        message: 'Not found',
+        statusCode: 404
+      });
+
+      await expect(
+        visualKnightCore['invokeTestSession'](testname, capabilities)
+      ).rejects.toThrowError(new Error('Not found'));
+    });
+  });
+
+  describe('processScreenshot', () => {
+    const successTestSessionResult: ITestSessionResponseData = {
+      misMatchTolerance: 0.01,
+      misMatchPercentage: 0,
+      isSameDimensions: true,
+      link: 'url'
+    };
+    it('shpuld process screenshot', async () => {
+      const testname = 'Some name';
+      const capabilities: IDesiredCapabilities = {
+        os: 'Windows',
+        browserName: 'Chrome'
+      };
+      const screenshot = 'screenshot';
+      const testSessionId = 'Some test session id';
+      const testSessionResult = successTestSessionResult;
+      visualKnightCore['invokeTestSession'] = jest
+        .fn()
+        .mockResolvedValueOnce(testSessionId);
+      visualKnightCore['uploadScreenshot'] = jest
+        .fn()
+        .mockResolvedValueOnce(testSessionResult);
+      visualKnightCore['processTestSessionResult'] = jest.fn();
+
+      await visualKnightCore.processScreenshot(
+        testname,
+        screenshot,
+        capabilities
+      );
+
+      expect(visualKnightCore['invokeTestSession']).toHaveBeenCalledWith(
+        testname,
+        capabilities
+      );
+      expect(visualKnightCore['uploadScreenshot']).toHaveBeenCalledWith(
+        Buffer.from(screenshot, 'base64'),
+        testSessionId
+      );
+      expect(visualKnightCore['processTestSessionResult']).toHaveBeenCalledWith(
+        testSessionResult
+      );
     });
   });
 });
