@@ -27,38 +27,24 @@ export class VisualKnightCore {
     this.options.debugLogger('Visual Knight: ' + message);
   }
 
-  public async processScreenshot(
-    testname: string,
-    screenshot: Base64,
-    capabilities: IDesiredCapabilities
-  ) {
+  public async processScreenshot(testname: string, screenshot: Base64, capabilities: IDesiredCapabilities) {
     // add error handling
     this.debug('Requesting signed url');
     const testSessionId = await this.invokeTestSession(testname, capabilities);
     this.debug(`Test session id: ${testSessionId}`);
 
     this.debug('Uploading image and get test data');
-    const testSessionData = await this.uploadScreenshot(
-      Buffer.from(screenshot, 'base64'),
-      testSessionId
-    );
+    const testSessionData = await this.uploadScreenshot(Buffer.from(screenshot, 'base64'), testSessionId);
 
     this.debug('RESULT:');
-    this.debug(
-      `   set mismatch tolerance: ${testSessionData.misMatchTolerance}`
-    );
-    this.debug(
-      `   calculated mismatch in % : ${testSessionData.misMatchPercentage}`
-    );
+    this.debug(`   set mismatch tolerance: ${testSessionData.misMatchTolerance}`);
+    this.debug(`   calculated mismatch in % : ${testSessionData.misMatchPercentage}`);
     this.debug(`   is same dimension: ${testSessionData.isSameDimensions}`);
 
     return this.processTestSessionResult(testSessionData);
   }
 
-  private async invokeTestSession(
-    testname: string,
-    capabilities: IDesiredCapabilities
-  ) {
+  private async invokeTestSession(testname: string, capabilities: IDesiredCapabilities) {
     const data = {
       query: `
         mutation invokeTestSession(
@@ -110,10 +96,7 @@ export class VisualKnightCore {
     }
   }
 
-  private async uploadScreenshot(
-    decodedScreenshot: Buffer,
-    testSessionId: string
-  ) {
+  private async uploadScreenshot(decodedScreenshot: Buffer, testSessionId: string) {
     const data = {
       query: `
           mutation uploadScreenshot($testSessionId: String!, $base64Image: String!) {
@@ -142,20 +125,15 @@ export class VisualKnightCore {
           data: { data: { uploadScreenshot: ITestSessionResponseData } };
         }
       >(this.options.apiEndpoint, data, { headers: this.headers })
-      .then(result => result.data.data.uploadScreenshot)
-      .catch(error => {
+      .then((result) => result.data.data.uploadScreenshot)
+      .catch((error) => {
         this.debug(error);
         throw error;
       });
   }
 
   private processTestSessionResult(result: ITestSessionResponseData) {
-    const {
-      misMatchPercentage,
-      isSameDimensions,
-      link,
-      misMatchTolerance
-    } = result;
+    const { misMatchPercentage, isSameDimensions, link, misMatchTolerance } = result;
 
     const error = new Error();
 

@@ -31,9 +31,7 @@ describe('process-screenshot', () => {
     it('should return undefined if no errors', () => {
       const testSessionResult = successTestSessionResult;
 
-      const result = visualKnightCore['processTestSessionResult'](
-        testSessionResult
-      );
+      const result = visualKnightCore['processTestSessionResult'](testSessionResult);
 
       expect(result).toBe(undefined);
     });
@@ -47,9 +45,7 @@ describe('process-screenshot', () => {
       expectedError.message = `For this image is no baseline defined! -> ${testSessionResult.link}`;
       expectedError.name = 'NoBaselineError';
 
-      expect(() =>
-        visualKnightCore['processTestSessionResult'](testSessionResult)
-      ).toThrowError(expectedError);
+      expect(() => visualKnightCore['processTestSessionResult'](testSessionResult)).toThrowError(expectedError);
     });
 
     it('should throw error if not the same dimension', () => {
@@ -61,9 +57,7 @@ describe('process-screenshot', () => {
       expectedError.message = `Compared Screenshots are not in the same dimension! -> ${testSessionResult.link}`;
       expectedError.name = 'IsSameDimensionsError';
 
-      expect(() =>
-        visualKnightCore['processTestSessionResult'](testSessionResult)
-      ).toThrowError(expectedError);
+      expect(() => visualKnightCore['processTestSessionResult'](testSessionResult)).toThrowError(expectedError);
     });
 
     it('should throw error if mismatch > tollerance', () => {
@@ -76,9 +70,7 @@ describe('process-screenshot', () => {
       expectedError.message = `Mismatch of ${testSessionResult.misMatchPercentage} % is greater than the tolerance ${testSessionResult.misMatchTolerance} %! -> ${testSessionResult.link}`;
       expectedError.name = 'MisMatchPercentageError';
 
-      expect(() =>
-        visualKnightCore['processTestSessionResult'](testSessionResult)
-      ).toThrowError(expectedError);
+      expect(() => visualKnightCore['processTestSessionResult'](testSessionResult)).toThrowError(expectedError);
     });
   });
 
@@ -99,10 +91,7 @@ describe('process-screenshot', () => {
         }
       });
 
-      const result = await visualKnightCore['uploadScreenshot'](
-        image,
-        testSessionId
-      );
+      const result = await visualKnightCore['uploadScreenshot'](image, testSessionId);
 
       expect(result).toBe(successTestSessionResult);
       expect(axios.post).toHaveBeenCalledWith(
@@ -138,9 +127,9 @@ describe('process-screenshot', () => {
       const testSessionId = 'Some testSessionId';
       axios.post = jest.fn().mockRejectedValueOnce(new Error('Some error'));
 
-      await expect(
-        visualKnightCore['uploadScreenshot'](image, testSessionId)
-      ).rejects.toThrowError(new Error('Some error'));
+      await expect(visualKnightCore['uploadScreenshot'](image, testSessionId)).rejects.toThrowError(
+        new Error('Some error')
+      );
     });
   });
 
@@ -159,10 +148,7 @@ describe('process-screenshot', () => {
         }
       });
 
-      const result = await visualKnightCore['invokeTestSession'](
-        testname,
-        capabilities
-      );
+      const result = await visualKnightCore['invokeTestSession'](testname, capabilities);
 
       expect(result).toBe(expectedTestSession);
       expect(axios.post).toHaveBeenCalledWith(
@@ -208,9 +194,9 @@ describe('process-screenshot', () => {
         statusCode: 400
       });
 
-      await expect(
-        visualKnightCore['invokeTestSession'](testname, capabilities)
-      ).rejects.toThrowError(new Error('Not all required fields are set.'));
+      await expect(visualKnightCore['invokeTestSession'](testname, capabilities)).rejects.toThrowError(
+        new Error('Not all required fields are set.')
+      );
     });
 
     it('should throw error for code 403', async () => {
@@ -218,9 +204,7 @@ describe('process-screenshot', () => {
         statusCode: 403
       });
 
-      await expect(
-        visualKnightCore['invokeTestSession'](testname, capabilities)
-      ).rejects.toThrowError(
+      await expect(visualKnightCore['invokeTestSession'](testname, capabilities)).rejects.toThrowError(
         new Error('Not Authorized! Check if your key is set correct.')
       );
     });
@@ -231,9 +215,9 @@ describe('process-screenshot', () => {
         statusCode: 404
       });
 
-      await expect(
-        visualKnightCore['invokeTestSession'](testname, capabilities)
-      ).rejects.toThrowError(new Error('Not found'));
+      await expect(visualKnightCore['invokeTestSession'](testname, capabilities)).rejects.toThrowError(
+        new Error('Not found')
+      );
     });
   });
 
@@ -253,31 +237,18 @@ describe('process-screenshot', () => {
       const screenshot = 'screenshot';
       const testSessionId = 'Some test session id';
       const testSessionResult = successTestSessionResult;
-      visualKnightCore['invokeTestSession'] = jest
-        .fn()
-        .mockResolvedValueOnce(testSessionId);
-      visualKnightCore['uploadScreenshot'] = jest
-        .fn()
-        .mockResolvedValueOnce(testSessionResult);
+      visualKnightCore['invokeTestSession'] = jest.fn().mockResolvedValueOnce(testSessionId);
+      visualKnightCore['uploadScreenshot'] = jest.fn().mockResolvedValueOnce(testSessionResult);
       visualKnightCore['processTestSessionResult'] = jest.fn();
 
-      await visualKnightCore.processScreenshot(
-        testname,
-        screenshot,
-        capabilities
-      );
+      await visualKnightCore.processScreenshot(testname, screenshot, capabilities);
 
-      expect(visualKnightCore['invokeTestSession']).toHaveBeenCalledWith(
-        testname,
-        capabilities
-      );
+      expect(visualKnightCore['invokeTestSession']).toHaveBeenCalledWith(testname, capabilities);
       expect(visualKnightCore['uploadScreenshot']).toHaveBeenCalledWith(
         Buffer.from(screenshot, 'base64'),
         testSessionId
       );
-      expect(visualKnightCore['processTestSessionResult']).toHaveBeenCalledWith(
-        testSessionResult
-      );
+      expect(visualKnightCore['processTestSessionResult']).toHaveBeenCalledWith(testSessionResult);
     });
   });
 });
